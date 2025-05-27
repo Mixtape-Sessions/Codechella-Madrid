@@ -62,13 +62,88 @@ will use as outcomes `ln_agriculture` and `ln_manufacturing`.
 First, for `ln_agriculture`, we will manually calculate the means and
 form the difference-in-differences.
 
+``` r
+m_d1_y1960 <- mean(df[df$year == 1960 & df$tva == 1, ]$ln_agriculture)
+m_d1_y1940 <- mean(df[df$year == 1940 & df$tva == 1, ]$ln_agriculture)
+m_d0_y1960 <- mean(df[df$year == 1960 & df$tva == 0, ]$ln_agriculture)
+m_d0_y1940 <- mean(df[df$year == 1940 & df$tva == 0, ]$ln_agriculture)
+
+(m_d1_y1960 - m_d1_y1940) - (m_d0_y1960 - m_d0_y1940)
+```
+
+    [1] -0.2281978
+
+``` r
+# -0.2281978
+```
+
 Second, run the “classic” version using an indicator for treatment,
 `tva`, and indicator for being the post-period, `post`, and the product
 of the two. I recommend the package `fixest` for regression analysis.
 I’ll be using it in the solutions.
 
+``` r
+# `reghdfe`
+df_2by2 <- df |>
+  filter(year == 1940 | year == 1960)
+
+did_2by2 = feols(
+  c(ln_agriculture, ln_manufacturing) ~ 
+    i(post) + i(tva) + i(post * tva),
+  data = df_2by2, 
+  cluster = ~ county_code
+)
+```
+
 Second, we will see in the 2x2 DID case, using county and time fixed
 effects is equivalent:
+
+``` r
+did_2by2_fixed_effects = feols(
+  c(ln_agriculture, ln_manufacturing) ~ 
+    i(post * tva) | county_code + year,
+  data = df_2by2, 
+  cluster = ~ county_code
+)
+
+etable(
+  did_2by2, did_2by2_fixed_effects
+)
+```
+
+                             did_2by2.1         did_2by2.2 did_2by2_fixed_e..1
+    Dependent Var.:      ln_agriculture   ln_manufacturing      ln_agriculture
+                                                                              
+    Constant          7.671*** (0.0157)  6.188*** (0.0383)                    
+    post = 1        -0.7426*** (0.0097) 0.7506*** (0.0124)                    
+    tva = 1          0.3806*** (0.0493)    0.1369 (0.1098)                    
+    post x tva = 1  -0.2282*** (0.0214) 0.2774*** (0.0470) -0.2282*** (0.0214)
+    Fixed-Effects:  ------------------- ------------------ -------------------
+    county_code                      No                 No                 Yes
+    year                             No                 No                 Yes
+    _______________ ___________________ __________________ ___________________
+    S.E.: Clustered     by: county_code    by: county_code     by: county_code
+    Observations                  5,470              5,470               5,470
+    R2                          0.17484            0.04164             0.93323
+    Within R2                        --                 --             0.01371
+
+                    did_2by2_fixed_..2
+    Dependent Var.:   ln_manufacturing
+                                      
+    Constant                          
+    post = 1                          
+    tva = 1                           
+    post x tva = 1  0.2774*** (0.0470)
+    Fixed-Effects:  ------------------
+    county_code                    Yes
+    year                           Yes
+    _______________ __________________
+    S.E.: Clustered    by: county_code
+    Observations                 5,470
+    R2                         0.97357
+    Within R2                  0.01182
+    ---
+    Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 ## Question 2
 
@@ -86,6 +161,30 @@ pre-treatment period and 1930 as the post-treatment period. What does
 this tell us about the plausability of a parallel trends type
 assumption?
 
+``` r
+df_1920_1930 = df |>
+  filter(year == 1920 | year == 1930) |>
+  mutate(is_1930 = (year == 1930))
+
+# 1930 = "treatment period"
+# 1920 = "control period"
+feols(
+  c(ln_agriculture, ln_manufacturing) ~ 
+    i(tva * is_1930) | county_code + year,
+  data = df_1920_1930,
+  cluster = ~county_code
+)
+```
+
+    Standard-errors: Clustered (county_code) 
+    Dep. var.: ln_agriculture
+                      Estimate Std. Error  t value Pr(>|t|) 
+    tva * is_1930::1 -0.026524   0.025722 -1.03121  0.30253 
+    ---
+    Dep. var.: ln_manufacturing
+                     Estimate Std. Error  t value Pr(>|t|) 
+    tva * is_1930::1 0.125824   0.195052 0.645078  0.51893 
+
 ## Question 3
 
 Let’s put this analysis together and run an event-study regression using
@@ -94,12 +193,73 @@ the full dataset
 To do this, create a set of dummy variables that interact year with
 treatment status. Estimate the TWFE model with these dummy variables.
 
+``` r
+# Duflo, Mullinathan, and Bertrand (2004)
+df = df |>
+  mutate(
+    rel_year = ifelse(tva == 0, 1940, year)
+  )
+
+es_agriculture = feols(
+  ln_agriculture ~ i(rel_year, ref = c(1940)) | county_code + year,
+  data = df,
+  cluster = ~ county_code
+)
+iplot(es_agriculture)
+```
+
+![](README_files/figure-commonmark/unnamed-chunk-7-1.png)
+
+``` r
+es_manufacturing = feols(
+  ln_manufacturing ~ i(rel_year, ref = c(1940)) | county_code + year,
+  data = df,
+  cluster = ~ county_code
+)
+iplot(es_manufacturing)
+```
+
+![](README_files/figure-commonmark/unnamed-chunk-8-1.png)
+
 ## Question 4
 
 We see some evidence of pre-trends for `ln_manufacturing` which makes us
 concerned about the plausability of parallel counterfactual trends in
 the post-period. Let’s show this visually by extending a linear
 regression through the pre-period estimates.
+
+``` r
+est = broom::tidy(es_manufacturing)
+est = est |> 
+  mutate(
+    rel_year = as.numeric(str_replace(est$term, "rel_year::", ""))
+  )
+est = est |>
+  bind_rows(tibble(rel_year = 1940, estimate = 0))
+
+pre_trend_line = lm(
+  estimate ~ rel_year, 
+  data = est |> filter(rel_year <= 1930)
+)
+
+ggplot(est) +
+  geom_errorbar(
+    aes(
+      x = rel_year,
+      ymin = estimate - 1.96 * std.error,
+      ymax = estimate + 1.96 * std.error
+    ),
+    width = 1
+  ) + 
+  geom_point(aes(x = rel_year, y = estimate)) + 
+  geom_abline(
+    intercept = coef(pre_trend_line)[1],
+    slope = coef(pre_trend_line)[2],
+    color = "red"
+  )
+```
+
+![](README_files/figure-commonmark/unnamed-chunk-9-1.png)
 
 This exercise, assumes that changes in outcomes in the pre-period will
 extend linearly into the future. However, this is a strong assumption;
@@ -118,6 +278,68 @@ can control the “magnitude” of violations by a value of $\bar{M}$ with a
 value of 1 being equal to the largest violation and 0 being no bias. The
 code is kind of complicated, so I include it here:
 
+``` r
+library(HonestDiD)
+
+# need in time order, without reference group
+betahat = coef(es_manufacturing)
+sigma = vcov(es_manufacturing)
+
+# first post period effect
+first_l_vec <- basisVector(1, size = 2)
+# second post period effect
+second_l_vec <- basisVector(2, size = 2)
+# average of event-study estimates
+avg_l_vec <- matrix(c(0.5, 0.5), nrow = 2, ncol = 1)
+
+delta_rm_results <- HonestDiD::createSensitivityResults_relativeMagnitudes(
+  betahat = betahat,
+  sigma = sigma,
+  numPrePeriods = 2,
+  numPostPeriods = 2,
+  Mbarvec = seq(0.25, 1.5, by = 0.25), 
+  l_vec = avg_l_vec
+)
+```
+
+    Warning in .ARP_computeCI(betahat = betahat, sigma = sigma, numPrePeriods =
+    numPrePeriods, : CI is open at one of the endpoints; CI length may not be
+    accurate
+    Warning in .ARP_computeCI(betahat = betahat, sigma = sigma, numPrePeriods =
+    numPrePeriods, : CI is open at one of the endpoints; CI length may not be
+    accurate
+    Warning in .ARP_computeCI(betahat = betahat, sigma = sigma, numPrePeriods =
+    numPrePeriods, : CI is open at one of the endpoints; CI length may not be
+    accurate
+    Warning in .ARP_computeCI(betahat = betahat, sigma = sigma, numPrePeriods =
+    numPrePeriods, : CI is open at one of the endpoints; CI length may not be
+    accurate
+    Warning in .ARP_computeCI(betahat = betahat, sigma = sigma, numPrePeriods =
+    numPrePeriods, : CI is open at one of the endpoints; CI length may not be
+    accurate
+    Warning in .ARP_computeCI(betahat = betahat, sigma = sigma, numPrePeriods =
+    numPrePeriods, : CI is open at one of the endpoints; CI length may not be
+    accurate
+    Warning in .ARP_computeCI(betahat = betahat, sigma = sigma, numPrePeriods =
+    numPrePeriods, : CI is open at one of the endpoints; CI length may not be
+    accurate
+
+``` r
+originalResults <- HonestDiD::constructOriginalCS(
+  betahat = betahat,
+  sigma = sigma,
+  numPrePeriods = 2,
+  numPostPeriods = 2, 
+  l_vec = avg_l_vec
+)
+
+HonestDiD::createSensitivityPlot_relativeMagnitudes(
+  delta_rm_results, originalResults
+)
+```
+
+![](README_files/figure-commonmark/unnamed-chunk-10-1.png)
+
 ## Question 5
 
 Let’s use some controls to weaken the assumption to conditional parallel
@@ -127,6 +349,35 @@ trends. In particular, we are going to use a few covariates:
 
 What happens if we add those controls in linearly to our original
 estimate?
+
+``` r
+feols(
+  ln_manufacturing ~ i(year, agriculture_share_1920) + agriculture_share_1930 + manufacturing_share_1920 + manufacturing_share_1930 | year + county_code,
+  data = df
+)
+```
+
+    The variables 'year::1960:agriculture_share_1920', 'agriculture_share_1930', 'manufacturing_share_1920' and 'manufacturing_share_1930' have been removed because of collinearity (see $collin.var).
+
+    OLS estimation, Dep. Var.: ln_manufacturing
+    Observations: 13,675
+    Fixed-effects: year: 5,  county_code: 2,735
+    Standard-errors: Clustered (year) 
+                                       Estimate Std. Error       t value  Pr(>|t|)
+    year::1920:agriculture_share_1920 -3.560604   4.70e-14 -7.580830e+13 < 2.2e-16
+    year::1930:agriculture_share_1920 -2.324021   4.78e-14 -4.866365e+13 < 2.2e-16
+    year::1940:agriculture_share_1920 -0.558494   4.89e-14 -1.141093e+13 < 2.2e-16
+    year::1950:agriculture_share_1920 -0.335565   5.10e-14 -6.576429e+12 < 2.2e-16
+                                         
+    year::1920:agriculture_share_1920 ***
+    year::1930:agriculture_share_1920 ***
+    year::1940:agriculture_share_1920 ***
+    year::1950:agriculture_share_1920 ***
+    ... 4 variables were removed because of collinearity (year::1960:agriculture_share_1920, agriculture_share_1930 and 2 others [full set in $collin.var])
+    ---
+    Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    RMSE: 0.954523     Adj. R2: 0.812832
+                     Within R2: 0.104899
 
 *Answer:* The covariates are dropped because they are collinear with the
 county fixed effects.
@@ -224,14 +475,6 @@ propensity scores of this model.
 
 Form the weights $w_1$ and $w_0$ as written in the appendix and form the
 IPTW estimate.
-
-``` r
-logit = feglm(
-  tva ~ ..X,
-  data = first_diff, family = binomial()
-)
-ps = predict(logit, newdata = first_diff)
-```
 
 > \[!WARNING\]  
 > The weights are the ones proposed originally in Abadie (2005). They

@@ -26,14 +26,6 @@
 \definecolor{gray100}{HTML}{f3f4f6}
 \definecolor{gray800}{HTML}{1F292D}
 
-\definecolor{bgRaspberry}{HTML}{ff96a9}
-\definecolor{bgCranberry}{HTML}{fda4d0}
-\definecolor{bgOrange}{HTML}{f6b97b}
-\definecolor{bgPurple}{HTML}{adb4f4}
-\definecolor{bgBlue}{HTML}{cdfbff}
-\definecolor{bgGreen}{HTML}{8ee7af}
-\definecolor{bgRose}{HTML}{fecdd4}
-\definecolor{bgYellow}{HTML}{ffea88}
 
 % Beamer Options -------------------------------------
 
@@ -253,78 +245,4 @@
         \node (marker-#1-b) at (0,0) {};%
     \tikz[accent!80!jet, ultra thick, overlay, remember picture, inner sep=4pt]
         \node[draw, rectangle, fit=(marker-#1-a.center) (marker-#1-b.center)] {};%
-}
-
-
-% Define custom slide coordinate system ----------------------------------------
-% https://tex.stackexchange.com/questions/89588/positioning-relative-to-page-in-tikz
-% Defining a new coordinate system for the page:
-%
-% ┌──────────────────────────────────────────────┐
-% │ (0, 0)                                (1, 0) │
-% │                                              │
-% │                                              │
-% │                                              │
-% │                                              │
-% │                                              │
-% │ (0, 1)                                (1, 1) │
-% └──────────────────────────────────────────────┘
-%
-% source: https://tex.stackexchange.com/questions/89588/positioning-relative-to-page-in-tikz
-%
-\makeatletter
-\def\parsecomma#1,#2\endparsecomma{\def\page@x{#1}\def\page@y{#2}}
-\tikzdeclarecoordinatesystem{page}{
-    \parsecomma#1\endparsecomma
-    \pgfpointanchor{current page}{north west}
-    % Save the upper left corner
-    \pgf@xa=\pgf@x%
-    \pgf@ya=\pgf@y%
-    % save the lower right corner
-    \pgfpointanchor{current page}{south east}
-    \pgf@xb=\pgf@x%
-    \pgf@yb=\pgf@y%
-    % Transform to the correct placement
-    \pgfmathparse{(\pgf@xb-\pgf@xa)*\page@x+\pgf@xa}
-    \expandafter\pgf@x\expandafter=\pgfmathresult pt
-    \pgfmathparse{(\pgf@yb-\pgf@ya)*\page@y+\pgf@ya}
-    \expandafter\pgf@y\expandafter=\pgfmathresult pt
-}
-\makeatother
-
-% To overlay on beamer slides, use the following:
-%
-% \begin{tikzpicture}[remember picture, overlay]
-%   \node[anchor = north west] (anchor_name) at (page cs:0.0, 0.0) {
-%     CONTENT HERE
-%   };
-% \end{tikzpicture}
-%
-% Note page cs is the coordinate system from above
-
-% To help with placement, I will use `\devgrid` on a slide to figure out the coordinates of `page cs` to the 0.1
-\newcommand{\devgrid}{
-  \begin{tikzpicture}[remember picture, overlay]
-    % vertical lines
-    \draw (page cs: 0.1, 0.0) edge[black!20!white, line width = 0.3mm, dotted] (page cs: 0.1, 1.0);
-    \draw (page cs: 0.2, 0.0) edge[black!20!white, line width = 0.3mm, dotted] (page cs: 0.2, 1.0);
-    \draw (page cs: 0.3, 0.0) edge[black!20!white, line width = 0.3mm, dotted] (page cs: 0.3, 1.0);
-    \draw (page cs: 0.4, 0.0) edge[black!20!white, line width = 0.3mm, dotted] (page cs: 0.4, 1.0);
-    \draw (page cs: 0.5, 0.0) edge[black!20!white, line width = 0.3mm, dotted] (page cs: 0.5, 1.0);
-    \draw (page cs: 0.6, 0.0) edge[black!20!white, line width = 0.3mm, dotted] (page cs: 0.6, 1.0);
-    \draw (page cs: 0.7, 0.0) edge[black!20!white, line width = 0.3mm, dotted] (page cs: 0.7, 1.0);
-    \draw (page cs: 0.8, 0.0) edge[black!20!white, line width = 0.3mm, dotted] (page cs: 0.8, 1.0);
-    \draw (page cs: 0.9, 0.0) edge[black!20!white, line width = 0.3mm, dotted] (page cs: 0.9, 1.0);
-
-    % horizontal lines
-    \draw (page cs: 0.0, 0.1) edge[black!20!white, line width = 0.3mm, dotted] (page cs: 1.0, 0.1);
-    \draw (page cs: 0.0, 0.2) edge[black!20!white, line width = 0.3mm, dotted] (page cs: 1.0, 0.2);
-    \draw (page cs: 0.0, 0.3) edge[black!20!white, line width = 0.3mm, dotted] (page cs: 1.0, 0.3);
-    \draw (page cs: 0.0, 0.4) edge[black!20!white, line width = 0.3mm, dotted] (page cs: 1.0, 0.4);
-    \draw (page cs: 0.0, 0.5) edge[black!20!white, line width = 0.3mm, dotted] (page cs: 1.0, 0.5);
-    \draw (page cs: 0.0, 0.6) edge[black!20!white, line width = 0.3mm, dotted] (page cs: 1.0, 0.6);
-    \draw (page cs: 0.0, 0.7) edge[black!20!white, line width = 0.3mm, dotted] (page cs: 1.0, 0.7);
-    \draw (page cs: 0.0, 0.8) edge[black!20!white, line width = 0.3mm, dotted] (page cs: 1.0, 0.8);
-    \draw (page cs: 0.0, 0.9) edge[black!20!white, line width = 0.3mm, dotted] (page cs: 1.0, 0.9);
-  \end{tikzpicture}
 }

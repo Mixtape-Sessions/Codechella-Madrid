@@ -1,5 +1,5 @@
 #set page(
-  width: 600pt, 
+  width: 600pt,
   height: 450pt,
   margin: (x: 0pt, top: 0pt, bottom: 0pt),
   header: [
@@ -17,10 +17,9 @@
 
 #v(70pt)
 #align(center, [
-  #text(size: 36pt, weight: 600, fill: rgb("511299"), [CodeChella Madrid 2024])
+  #text(size: 36pt, weight: 600, fill: rgb("511299"), [CodeChella Madrid 2025])
 ])
 
 #align(bottom, [
   #figure(image(width: 100%, "../img/banner.png"))
 ])
-    

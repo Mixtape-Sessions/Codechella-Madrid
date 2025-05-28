@@ -59,18 +59,29 @@ reg Delta_y_diff _bsp_* dose if dose > 0
 * Get points for plotting
 predict te_est_spline if dose > 0, xb
 
+* Regress \Delta Y - count trend estimate on a set of bins
+cap drop bin_*
+gen bin_1 = dose < 0.1
+gen bin_2 = dose >= 0.1 & dose < 0.2
+gen bin_3 = dose >= 0.2
+reg Delta_y_diff i.bin_1 i.bin_2 i.bin_3 if dose > 0
+
+* Get points for plotting
+predict te_est_bins if dose > 0, xb
+
 * Plot
 sort dose
 twoway ///
   (scatter Delta_y_diff dose) ///
   (line te_est_linear dose) ///
-  (line te_est_spline dose), ///
+  (line te_est_spline dose) ///
+  (line te_est_bins dose), ///
   xlabel(, grid) ///
   ylabel(-1(0.5)1, grid) ///
   yscale(range(-1 1)) ///
   xtitle("(Predicted) decline in tariff from WTO Entrance") ///
   ytitle("Estimated ATT(d|d)") ///
-  legend(order(2 "Linear Estimate" 3 "Spline Estimate") ///
+  legend(order(2 "Linear Estimate" 3 "Spline Estimate" 4 "Bins Estimate") ///
           position(6) cols(2) region(style(none))) ///
   graphregion(color(white)) ///
   plotregion(style(none)) ///
@@ -132,7 +143,7 @@ sort dose
 twoway ///
   (scatter Delta_y_diff dose) ///
   (line te_est_linear dose) ///
-  (line te_est_spline dose), ///
+  (line te_est_spline dose) ///
   xlabel(, grid) ///
   ylabel(-1(0.5)1, grid) ///
   yscale(range(-1 1)) ///

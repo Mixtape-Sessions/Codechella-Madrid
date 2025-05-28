@@ -617,6 +617,714 @@ TWFE is no longer negative, interestingly, once we eliminate the last group (giv
 
 \end{frame}
 
+
+\subsection{Calculating event study coefficients with CS}
+
+
+\begin{frame}{What did regressions do?}
+
+\begin{itemize}
+
+\item In regressions, when you estimate leads and lags, you would drop one year dummy variable
+\item By dropping one year dummy variable, all coefficients were "long difference" calculations relative to that baseline -- both the $ATT(g,t)$ but also the event study pre-treatment coefficients
+\item Which means every event study plot you've ever seen with TWFE always was interpreted relative to a universal baseline (usually $t-1$)
+\item Some of the new estimators will allow for a different calculation, and this has created inconsistent estimators across new papers, which are relevant for checking for pre-trends
+
+\end{itemize}
+
+\end{frame}
+
+
+
+
+\begin{frame}{Event study lead calculation}
+
+\begin{itemize}
+
+\item In CS and dCDH (covered later), there are two ways to calculate the pre-treatment coefficients once you have obtained the ATT(g,t) parameter estimates:
+	\begin{enumerate}
+	\item \textbf{Long difference}. Uses a "universal baseline" with a fixed baseline at \( t-1 \).
+	
+	\begin{eqnarray*}
+	 \widehat{\delta}_{t-3} = \left( E[Y|D=1, t-3] - E[Y|D=1, t-1] \right) \\
+	 - \left( E[Y|D=0, t-3] - E[Y|D=0, t-1] \right)
+	 \end{eqnarray*}
+
+
+	\item \textbf{Short gap}. Uses a "rolling" method in which a new baseline is used for each 2x2 comparison.
+	
+	\begin{eqnarray*}
+	 \widehat{\delta}_{t-3} = \left( E[Y|D=1, t-3] - E[Y|D=1, t-2] \right) \\
+	 - \left( E[Y|D=0, t-3] - E[Y|D=0, t-2] \right)
+	 \end{eqnarray*}
+	 
+	 \end{enumerate}
+	 
+ \item Both are diff-in-diff $2 \times 2$, but pre-trends can be zero in one, but not the other
+	 
+\end{itemize}
+
+\end{frame}
+
+
+
+
+
+\begin{frame}{What is the event study for?}
+
+\begin{itemize}
+
+\item The purpose of the event study is as a \emph{falsification}, not as a proof of the parallel trends
+\item Falsifications should be the \emph{same} model used for estimation but applied to something that it cannot cause -- "same group, different outcome"
+\item In this case, future treatments under no anticipation cannot affect the past
+\item Since the estimation of post-treatment ATT use $t-1$ for "pre" period, the falsifications in the event studies should too 
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Detecting it in papers}
+
+\begin{itemize}
+
+\item Very easy to spot which method someone used 
+\item Long differences \emph{never} have a coefficient at baseline, because long differences uses baseline as the comparison \emph{always}
+\item Short gaps will \emph{always} have a coefficient at baseline
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Detecting it in papers}
+
+\begin{itemize}
+
+\item Interestingly, long differences and short gaps have the same information -- you can easily convert one into the other -- but one will show trends and the other won't
+\item So which one is right?  Remember -- parallel trends is a long difference, and all calculations are long differences, even in CS, so in my opinion so should the event study coefficients
+\item Plus remember -- TWFE invented the event study, long differences is what we expect, so it's a subtle switching out of visualizing pre-trends from our expectation
+\item Let's look at a simulation by Jon Roth (2024) where he build data with rising pre-trends which he then estimated with TWFE (long difference), CS (short gaps), dCDH (short gaps) and BJS (Kyle can discuss this tomorrow)
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Short Gaps and Long Differences}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth, height=0.8\textheight, keepaspectratio]{./lecture_includes/shortgap}
+\end{figure}
+
+\end{frame}
+
+\begin{frame}{Stata Syntax}
+
+\begin{itemize}
+
+\item Stata's \texttt{csdid} has default syntax where if you don't indicate which way to do it, it only does it using the short gap method
+\item And in the Stata user command from Stata 18, you actually \textbf{cannot} do short differences 
+\item You have to select \texttt{long2} in \texttt{csdid} and if you want short gaps, you do not specify anything
+\item So what is going on is that since it's not documented well, \texttt{csdid} is very population, and default is short gaps, people are using short gaps and probably don't know, and don't explain it in the papers
+\item Here is an NBER that clearly uses short gaps -- with my hand I'll show you the long difference version of the same thing
+\end{itemize}
+
+\end{frame}
+
+
+
+
+\begin{frame}
+
+\begin{figure}
+    \centering
+    \includegraphics[height=0.5\textheight]{./lecture_includes/magic_johnson_eventstudy}
+\end{figure}
+
+\end{frame}
+
+
+\section{Checklists and My Online Dating Project}
+
+
+\begin{frame}{How Checklists Saved Lives in Medicine}
+    \textbf{Key Idea:} Checklists reduce errors and improve patient safety by standardizing procedures and preventing overlooked steps.
+
+    \begin{itemize}
+        \item 
+	\textit{The Checklist Manifesto} by Atul Gawande explores how checklists improve outcomes in medicine, aviation, and other fields.
+        \item 
+	The WHO Surgical Safety Checklist reduced complications and mortality in surgeries worldwide. A study found a 36\% reduction in major surgical complications.
+        \item 
+	Checklists are thought to work because they:
+        \begin{itemize}
+            \item Ensure that critical steps are not skipped.
+            \item Encourage teamwork and communication.
+            \item Create a structured, repeatable process for complex tasks.
+        \end{itemize}
+    \end{itemize}
+
+
+\end{frame}
+
+
+\begin{frame}{Power to the Platform}
+
+\begin{itemize}
+\item I'm going to now walk you through a simple checklist I have in my new book
+\item Got this from Roth (2022), Pedro Sant'Anna informal conversations, principles from Rubin (2008) and many of Guido Imbens' survey articles
+\item We ran into a lot of problems by following this checklist, and a lot of heartbreak followed by excitement
+\item It's a study of online dating's effect on the American family, but I'll just focus on birth rates
+\item We have a great title -- Power the Platform -- as a homage to "Power to the Pill" by Goldin and Katz and "More Power to the Pill" by Bailey
+\end{itemize}
+
+\end{frame}
+
+
+
+
+
+\begin{frame}{Online Dating and Birth Rates}
+
+\begin{itemize}
+\item Me, Christine Durrance, and Melanie Guldi have been working on a project for years looking at online dating's effect on birth rates
+	\begin{itemize}
+	\item Thickening of relationship markets
+	\item Reduced search costs
+	\item Formation of better relationships meant for forming families
+	\end{itemize}
+\item But online dating companies have an incentive to perpetuate dating despite claims to the contrary, which may reduce the formation of families
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}
+
+\begin{figure}
+    \centering
+    \includegraphics[height=0.85\textheight]{./lecture_includes/online_dating}
+\end{figure}
+
+\end{frame}
+
+\begin{frame}{Confounders}
+
+\begin{itemize}
+
+\item Two problems:
+	\begin{enumerate}
+	\item Online dating either hits the US with an open website anyone can get on (early period) or a "swiping app" that anyone can get on (late period)
+	\item After 2008, the American economy birth rates plummeted and never recovered (demographic transition)
+	\end{enumerate}
+\item Both are massive hurricane like winds and it's going to be challenging to deal with them with diff-in-diff
+\item But, amazingly, we have a solution that gets at both and is probably much closer to our target parameter -- Craigslist Personals
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{What was Craigslist Personals?}
+
+\begin{itemize}
+\item Craigslist is one of the most visited websites in the United States
+\item Two sided matching website that devastated classified advertising revenue in newspapers
+\item Primarily made money from housing and jobs, but you can get \emph{anything} on it 
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{What was Craigslist Personals?}
+
+\begin{itemize}
+\item But then in 2000, in the Bay Area (i.e., San Francisco), they introduce "People matching technology" (their words) 
+\item Casual sex, serious relationships, men seeking men, men seeking women, women seeking men, women seeking men
+\item And great for us -- cities got this on different dates giving us "staggered rollout" 
+\end{itemize}
+
+\end{frame}
+
+
+
+
+
+
+
+
+
+\begin{frame}{Personals}
+
+\begin{figure}
+    \centering
+    \includegraphics[height=0.85\textheight]{./lecture_includes/melanie1}
+\end{figure}
+
+\end{frame}
+
+
+\begin{frame}{Personals}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.5\textheight]{./lecture_includes/melanie2}
+\end{figure}
+
+\end{frame}
+
+\begin{frame}{Personals starts in San Francisco}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.85\textheight]{./lecture_includes/melanie3}
+\end{figure}
+
+\end{frame}
+
+\begin{frame}{Personals begins spreading}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.85\textheight]{./lecture_includes/melanie4}
+\end{figure}
+
+\end{frame}
+
+\begin{frame}{Personals gets larger}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.85\textheight]{./lecture_includes/melanie5}
+\end{figure}
+
+\end{frame}
+
+\begin{frame}{Personals is popular!}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.85\textheight]{./lecture_includes/melanie6}
+\end{figure}
+
+\end{frame}
+
+\begin{frame}{Personals is popular!}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.85\textheight]{./lecture_includes/melanie7}
+\end{figure}
+
+\end{frame}
+
+\begin{frame}{Personals is popular!}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.85\textheight]{./lecture_includes/melanie8}
+\end{figure}
+
+\end{frame}
+
+
+\begin{frame}{Our project}
+
+\begin{itemize}
+\item So we have geographic rollout from 2000 to 2010
+	\begin{enumerate}
+\item But after 2008, Great Recession leads to plummeting birth rates
+\item And after 2008, we have social media, smart phones, all of which maybe had their own independent effects on matching ("sex recessions")
+	\end{enumerate}
+\item So we will use 1995 (pre-treatment) to 2007 as our sample period
+\item But we will include the 2008-2010 "later treated counties" as our control group
+\item Used the wayback machine to get every county's craigslist start date (three of us and an RA!)
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Recovery of Birth Rates (National vs. County)}
+    \centering
+    \begin{columns}
+        \column{0.5\textwidth}
+        \centering
+        \textbf{Average National Birth Rates}
+        \includegraphics[width=\linewidth,height=0.6\textheight,keepaspectratio]{./lecture_includes/national_br.png}
+        
+        \column{0.5\textwidth}
+        \centering
+        \textbf{Average County Birth Rates}
+        \includegraphics[width=\linewidth,height=0.6\textheight,keepaspectratio]{./lecture_includes/county_br.png}
+    \end{columns}
+\end{frame}
+
+
+\begin{frame}
+
+\begin{figure}
+    \centering
+    \includegraphics[height=0.6\textheight]{./lecture_includes/python_births.png}
+\end{figure}
+
+\end{frame}
+
+
+
+
+
+\begin{frame}[shrink=20]{Number of counties by treatment cohorts}
+\begin{table}[htbp]\centering
+\caption{Number of counties by year Craigslist personals appeared}\label{tab:countybycohort}
+\begin{tabular}{lc}
+\toprule
+\textbf{Treatment Cohort} & \textbf{Number of Counties Treated} \\
+\midrule
+Never treated&       1,779\\
+2000 cohort &           9\\
+2001 cohort &           5\\
+2002 cohort &          12\\
+2003 cohort &          36\\
+2004 cohort &          58\\
+2005 cohort &          69\\
+2006 cohort &         341\\
+2007 cohort &          65\\
+2008 cohort &          66\\
+2009 cohort &         215\\
+2010 cohort &           1\\
+\midrule
+Total counties &     2,656 \\
+\bottomrule
+\end{tabular}
+\end{table}
+\end{frame}
+
+
+\begin{frame}{Rollout of Craigslist's Personals}
+    \centering
+    \includegraphics[width=\textwidth,height=0.95\textheight,keepaspectratio]{./lecture_includes/rollout.png}
+\end{frame}
+
+\begin{frame}{Births by Treatment Cohort}
+    \includegraphics[width=\textwidth,height=0.9\textheight,keepaspectratio]{./lecture_includes/pretty_births.png}
+\end{frame}
+
+
+\begin{frame}{Estimator selection}
+
+\begin{itemize}
+
+\item We used CS to estimate the average effect of the rollout on birth rates 
+\item It's unweighted by population so "average effect on the average county for now
+\item We decided to make our control group the "2008-2010" as our control group because at least they were eventually treated, but doesn't really matter as never-treated gets same things
+\item First, I want to just illustrate for you the "short vs long difference" issue
+
+\end{itemize}
+
+\end{frame}
+
+
+
+
+
+\begin{frame}{Short gap event study, no covariates}
+
+\begin{figure}
+    \centering
+    \includegraphics[height=0.85\textheight]{./lecture_includes/es_births_shortnone.png}
+\end{figure}
+
+\end{frame}
+
+\begin{frame}{Long differences event study, no covariates}
+
+\begin{figure}
+    \centering
+    \includegraphics[height=0.85\textheight]{./lecture_includes/es_births_none}
+\end{figure}
+
+\end{frame}
+
+
+\begin{frame}{Trends or No Trends?!}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{minipage}[b]{0.48\textwidth}
+        \centering
+    \includegraphics[height=0.45\textheight]{./lecture_includes/es_births_shortnone.png}
+        \caption{Short Gap}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[b]{0.48\textwidth}
+        \centering
+    \includegraphics[height=0.45\textheight]{./lecture_includes/es_births_none}
+        \caption{Long Difference}
+    \end{minipage}
+\end{figure}
+
+\end{frame}
+
+
+\begin{frame}{Scrutinizing that event study}
+
+\begin{itemize}
+\item I was so excited when I saw those flat pre-trends until I learned that the default syntax in Stata's \texttt{csdid} calculated short gaps!
+\item We had a whole story that online dating caused "permanent dating" until I realized that!! lol
+\item But more than that -- was unconditional parallel trends really plausible?  
+\item We are assuming the mean change in "untreated birth rates" is the same in our timing cohorts as the comparison cohort, but that assumes a particular "similar control group" and we have no covariates
+\end{itemize}
+\end{frame}
+
+
+
+\begin{frame}{Who got a Craigslist and who didn't?}
+
+\begin{itemize}
+
+\item Craigslist is this: \url{houston.craigslist.org} for Houston, Texas
+\item I grew up in a town in Mississippi called Brookhaven with a population of 11,000 and if you search for \url{brookhaven.craigslist.org} it's not there
+\item Craigslist targeted \emph{cities} but most of the US counties are \emph{rural}
+\end{itemize}
+
+\end{frame}
+
+
+
+\begin{frame}{Is Unconditional parallel trends plausible?}
+
+\begin{itemize}
+\item But my coauthors are demographers who focus a lot on maternal health and children, plus they're labor economists and they urban counties and rural counties differ:
+	\begin{itemize}
+	\item Cities have more college educated women, delayed childbearing, lower marriage rates, different racial composition, more access to female healthcare resources
+	\item Rural towns have lower educated women, earlier age at first birth, higher marriage rates, more homogenous, worse healthcare access
+	\end{itemize}
+\item If Craigslist counties are more urban, then our treatment and control are imbalance on covariates that cause trends in $Y^0$
+\item Let's look at mean female population and urban measures by timing cohort
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Female population by timing cohort}
+
+\begin{figure}
+    \centering
+    \includegraphics[height=0.85\textheight]{./lecture_includes/pretty_fempop}
+\end{figure}
+
+\end{frame}
+
+
+\begin{frame}{Urban and rural counties by timing cohort}
+
+\begin{figure}
+    \centering
+    \includegraphics[height=0.85\textheight]{./lecture_includes/pretty_RUCC}
+\end{figure}
+
+\end{frame}
+
+
+
+\begin{frame}{Control for 9-digit urban code}
+
+\begin{itemize}
+
+\item So we decided -- and I still remember this day -- to just include one variable
+\item 9-digit RUCC code measuring "how urban is the county?"
+	\begin{itemize}
+	\item RUCC code of 1: VERY URBAN (e.g., San Francisco)
+	\item RUCC code of 9: VERY RURAL (e.g., Brookhaven)
+	\end{itemize}
+\item Effectively, what is happening when we do this, it is as though we are estimating CS for 1s, 2s, 3s, and so on
+\item Our control group is so large they have \emph{every RUCC code}
+\item So, we estimate CS with 8 RUCC dummies (more dramatic if I show it to you)
+\end{itemize}
+
+\end{frame}
+
+
+
+
+\begin{frame}{Long Differences, with and without RUCC dummies}
+
+\begin{figure}
+    \centering
+    \includegraphics[height=0.85\textheight]{./lecture_includes/es_br1544_combined.png}
+\end{figure}
+
+\end{frame}
+
+\begin{frame}{Now put yourself in my shoes!}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{minipage}[b]{0.48\textwidth}
+        \centering
+    \includegraphics[height=0.45\textheight]{./lecture_includes/es_births_shortnone}
+        \caption{Short Gap, no covariates}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[b]{0.48\textwidth}
+        \centering
+    \includegraphics[height=0.45\textheight]{./lecture_includes/es_births_RUCC.png}
+        \caption{Long Difference, 8 RUCC dummies}
+    \end{minipage}
+\end{figure}
+
+\end{frame}
+
+\begin{frame}{Breaking down CS by RUCC Code}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.85\textheight]{./lecture_includes/es_br1544_RUCCcombined.png}
+\end{figure}
+
+\end{frame}
+
+\begin{frame}{Any more covariates?}
+
+\begin{itemize}
+
+\item So then we started asking ourselves -- is urban enough?  And how will we decide?
+\item We decided we urban dummies captured a lot of things, but we wanted more, but what and how will we decide so limit specification searching
+\item We decided to LASSO on $\Delta Birth\_rates$ using only the pretreatment periods because $\Delta Y_{t-\tau} = \Delta Y^0_{t-\tau}$ then 
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Specific LASSO steps}
+
+\begin{enumerate}
+\item Regress birth rates on state-year interactions for 1995-1999 (pre-treatment)
+\item Took first difference per county for residuals
+\item LASSO regression of first difference residuals (county-level)
+\item Cross validation
+\end{enumerate}
+
+LASSO selected male to female sex ratio, per capita income, and unemployment rates (out of 11 covariates)
+
+\end{frame}
+
+\begin{frame}{CS estimator with 8 RUCC codes, sex ratio, per capita income and unemployment rate}
+
+\begin{figure}
+    \centering
+    \includegraphics[height=0.85\textheight]{./lecture_includes/lasso_br1544}
+\end{figure}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Yikes!}
+
+\begin{itemize}
+\item What's going on?  Overlap problems
+\item We are creating "separation" caused by curse of dimensionality
+\item All of the propensity scores are ending up not overlapping
+\item So we had to discretize the covariates into quantiles
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{CS estimator with 8 RUCC codes, sex ratio, per capita income and unemployment rate quantiles}
+
+\begin{figure}
+    \centering
+    \includegraphics[height=0.85\textheight]{./lecture_includes/es_births_allX.png}
+\end{figure}
+
+\end{frame}
+
+\begin{frame}{Interpreting those late lags}
+
+\begin{itemize}
+\item We have staggered rollout -- why does that matter?
+\item All cohorts contribute $t=0$, but we lose one cohort at each lag
+\item We don't find positive effects until 3rd lag and there's two things happening
+	\begin{enumerate}
+	\item On the one hand, it takes at least 9 months after meeting "the one" to have a child, so lags are reassuring
+	\item On the other hand, CS is literally losing cohorts with each lag so mechanical sample selection
+	\end{enumerate}
+
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}[shrink=20]{Number of counties by treatment cohorts}
+\begin{table}[htbp]\centering
+\caption{Number of counties by year Craigslist personals appeared}\label{tab:countybycohort}
+\begin{tabular}{lc}
+\toprule
+\textbf{Treatment Cohort} & \textbf{Number of Counties Treated} \\
+\midrule
+Never treated&       1,779\\
+2000 cohort &           9\\
+2001 cohort &           5\\
+2002 cohort &          12\\
+2003 cohort &          36\\
+2004 cohort &          58\\
+2005 cohort &          69\\
+2006 cohort &         341\\
+2007 cohort &          65\\
+2008 cohort &          66\\
+2009 cohort &         215\\
+2010 cohort &           1\\
+\midrule
+Total counties &     2,656 \\
+\bottomrule
+\end{tabular}
+\end{table}
+\end{frame}
+
+\begin{frame}{Differentially sized cohorts}
+
+\begin{itemize}
+\item But there's more -- those "late adopters" are \emph{massive} which in CS is causing that alone them to shift the effects
+\item Simple ATT is not significant with the 2006 cohort, but it is when it's gone
+\item But it's just size -- those late adopters are \emph{rural}, they are \emph{much later}
+\item Lots of different things about them and we are working on that now
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Writing this up will be horrible!}
+
+\begin{itemize}
+
+\item I don't mind showing you all this because it's a workshop about doing the work
+\item Mark and Dan are going to talk about writing the papers!
+\item But, we have \emph{no idea} how we are going to somehow collect all of this and make one coherent paper (we will be taking Mark and Dan's hidden curriculum workshop!)
+\item Point is, though, that that's a different part of the process -- we want to understand \emph{mechanically} what CS is doing, \emph{numerically} the calculations (e.g., the weighting, the "dropping out cohorts")
+\item We don't just want to jump to some gestation story in other words
+\end{itemize}
+
+\end{frame}
+
+
+
+\begin{frame}{Be Curious, Not Judgment -- Ted Lasso}
+
+\begin{itemize}
+
+\item Do everything you can to figure out the treatment assignment mechanism 
+\item Shoeleather dominates technical knowledge (Rubin 2008 "Design Trumps Analysis"; Freedman 1991)
+\item Consider interviewing key people!  But don't ask them if they randomized -- they don't know what that word means
+\item Ask them "hey, why did you do that thing you did?" or "hey, why did some people get put into your program but not others?"
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[shrink=20]
+    \centering
+    \begin{center}
+    \begin{figure}
+        \includegraphics[width=\textwidth]{./lecture_includes/craig_dm}
+    \end{figure}
+    \end{center}
+    
+
+    
+\end{frame}
+
+
+
+
+\section{Alternative Estimators and Sensitivity Analysis}
+
 \subsection{Sun and Abraham (SA)}
 
 
@@ -1269,704 +1977,8 @@ DID_M = \sum_t \left(\text{weights}_t \cdot DID_{+,t}\right) + \sum_t \left(\tex
 
 
 
-\section{Calculating event study coefficients with new estimators}
 
-
-\begin{frame}{What did regressions do?}
-
-\begin{itemize}
-
-\item In regressions, when you estimate leads and lags, you would drop one year dummy variable
-\item By dropping one year dummy variable, all coefficients were "long difference" calculations relative to that baseline -- both the $ATT(g,t)$ but also the event study pre-treatment coefficients
-\item Which means every event study plot you've ever seen with TWFE always was interpreted relative to a universal baseline (usually $t-1$)
-\item Some of the new estimators will allow for a different calculation, and this has created inconsistent estimators across new papers, which are relevant for checking for pre-trends
-
-\end{itemize}
-
-\end{frame}
-
-
-
-
-\begin{frame}{Event study lead calculation}
-
-\begin{itemize}
-
-\item In CS and dCDH, there are two ways to calculate the pre-treatment coefficients once you have obtained the ATT(g,t) parameter estimates:
-	\begin{enumerate}
-	\item \textbf{Long difference}. Uses a "universal baseline" with a fixed baseline at \( t-1 \).
-	
-	\begin{eqnarray*}
-	 \widehat{\delta}_{t-3} = \left( E[Y|D=1, t-3] - E[Y|D=1, t-1] \right) \\
-	 - \left( E[Y|D=0, t-3] - E[Y|D=0, t-1] \right)
-	 \end{eqnarray*}
-
-
-	\item \textbf{Short gap}. Uses a "rolling" method in which a new baseline is used for each 2x2 comparison.
-	
-	\begin{eqnarray*}
-	 \widehat{\delta}_{t-3} = \left( E[Y|D=1, t-3] - E[Y|D=1, t-2] \right) \\
-	 - \left( E[Y|D=0, t-3] - E[Y|D=0, t-2] \right)
-	 \end{eqnarray*}
-	 
-	 \end{enumerate}
-	 
- \item Both are diff-in-diff $2 \times 2$, but pre-trends can be zero in one, but not the other
-	 
-\end{itemize}
-
-\end{frame}
-
-
-
-
-
-\begin{frame}{What is the event study for?}
-
-\begin{itemize}
-
-\item The purpose of the event study is as a \emph{falsification}, not as a proof of the parallel trends
-\item Falsifications should be the \emph{same} model used for estimation but applied to something that it cannot cause -- "same group, different outcome"
-\item In this case, future treatments under no anticipation cannot affect the past
-\item Since the estimation of post-treatment ATT use $t-1$ for "pre" period, the falsifications in the event studies should too 
-\end{itemize}
-
-\end{frame}
-
-
-\begin{frame}{Detecting it in papers}
-
-\begin{itemize}
-
-\item Very easy to spot which method someone used 
-\item Long differences \emph{never} have a coefficient at baseline, because long differences uses baseline as the comparison \emph{always}
-\item Short gaps will \emph{always} have a coefficient at baseline
-
-\end{itemize}
-
-\end{frame}
-
-\begin{frame}{Detecting it in papers}
-
-\begin{itemize}
-
-\item Interestingly, long differences and short gaps have the same information -- you can easily convert one into the other -- but one will show trends and the other won't
-\item So which one is right?  Remember -- parallel trends is a long difference, and all calculations are long differences, even in CS, so in my opinion so should the event study coefficients
-\item Plus remember -- TWFE invented the event study, long differences is what we expect, so it's a subtle switching out of visualizing pre-trends from our expectation
-\item Let's look at a simulation by Jon Roth (2024) where he build data with rising pre-trends which he then estimated with TWFE (long difference), CS (short gaps), dCDH (short gaps) and BJS (Kyle can discuss this tomorrow)
-
-\end{itemize}
-
-\end{frame}
-
-\begin{frame}{Short Gaps and Long Differences}
-
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=\linewidth, height=0.8\textheight, keepaspectratio]{./lecture_includes/shortgap}
-\end{figure}
-
-\end{frame}
-
-\begin{frame}{Stata Syntax}
-
-\begin{itemize}
-
-\item Stata's \texttt{csdid} has default syntax where if you don't indicate which way to do it, it only does it using the short gap method
-\item And in the Stata user command from Stata 18, you actually \textbf{cannot} do short differences 
-\item You have to select \texttt{long2} in \texttt{csdid} and if you want short gaps, you do not specify anything
-\item So what is going on is that since it's not documented well, \texttt{csdid} is very population, and default is short gaps, people are using short gaps and probably don't know, and don't explain it in the papers
-\item Here is an NBER that clearly uses short gaps -- with my hand I'll show you the long difference version of the same thing
-\end{itemize}
-
-\end{frame}
-
-
-
-
-\begin{frame}
-
-\begin{figure}
-    \centering
-    \includegraphics[height=0.5\textheight]{./lecture_includes/magic_johnson_eventstudy}
-\end{figure}
-
-\end{frame}
-
-
-\section{Checklists and My Online Dating Project}
-
-
-\begin{frame}{How Checklists Saved Lives in Medicine}
-    \textbf{Key Idea:} Checklists reduce errors and improve patient safety by standardizing procedures and preventing overlooked steps.
-
-    \begin{itemize}
-        \item 
-	\textit{The Checklist Manifesto} by Atul Gawande explores how checklists improve outcomes in medicine, aviation, and other fields.
-        \item 
-	The WHO Surgical Safety Checklist reduced complications and mortality in surgeries worldwide. A study found a 36\% reduction in major surgical complications.
-        \item 
-	Checklists are thought to work because they:
-        \begin{itemize}
-            \item Ensure that critical steps are not skipped.
-            \item Encourage teamwork and communication.
-            \item Create a structured, repeatable process for complex tasks.
-        \end{itemize}
-    \end{itemize}
-
-
-\end{frame}
-
-
-\begin{frame}{Power to the Platform}
-
-\begin{itemize}
-\item I'm going to now walk you through a simple checklist I have in my new book
-\item Got this from Roth (2022), Pedro Sant'Anna informal conversations, principles from Rubin (2008) and many of Guido Imbens' survey articles
-\item We ran into a lot of problems by following this checklist, and a lot of heartbreak followed by excitement
-\item It's a study of online dating's effect on the American family, but I'll just focus on birth rates
-\item We have a great title -- Power the Platform -- as a homage to "Power to the Pill" by Goldin and Katz and "More Power to the Pill" by Bailey
-\end{itemize}
-
-\end{frame}
-
-
-
-
-
-\begin{frame}{Online Dating and Birth Rates}
-
-\begin{itemize}
-\item Me, Christine Durrance, and Melanie Guldi have been working on a project for years looking at online dating's effect on birth rates
-	\begin{itemize}
-	\item Thickening of relationship markets
-	\item Reduced search costs
-	\item Formation of better relationships meant for forming families
-	\end{itemize}
-\item But online dating companies have an incentive to perpetuate dating despite claims to the contrary, which may reduce the formation of families
-\end{itemize}
-\end{frame}
-
-
-\begin{frame}
-
-\begin{figure}
-    \centering
-    \includegraphics[height=0.85\textheight]{./lecture_includes/online_dating}
-\end{figure}
-
-\end{frame}
-
-\begin{frame}{Confounders}
-
-\begin{itemize}
-
-\item Two problems:
-	\begin{enumerate}
-	\item Online dating either hits the US with an open website anyone can get on (early period) or a "swiping app" that anyone can get on (late period)
-	\item After 2008, the American economy birth rates plummeted and never recovered (demographic transition)
-	\end{enumerate}
-\item Both are massive hurricane like winds and it's going to be challenging to deal with them with diff-in-diff
-\item But, amazingly, we have a solution that gets at both and is probably much closer to our target parameter -- Craigslist Personals
-
-\end{itemize}
-
-\end{frame}
-
-\begin{frame}{What was Craigslist Personals?}
-
-\begin{itemize}
-\item Craigslist is one of the most visited websites in the United States
-\item Two sided matching website that devastated classified advertising revenue in newspapers
-\item Primarily made money from housing and jobs, but you can get \emph{anything} on it 
-\end{itemize}
-
-\end{frame}
-
-\begin{frame}{What was Craigslist Personals?}
-
-\begin{itemize}
-\item But then in 2000, in the Bay Area (i.e., San Francisco), they introduce "People matching technology" (their words) 
-\item Casual sex, serious relationships, men seeking men, men seeking women, women seeking men, women seeking men
-\item And great for us -- cities got this on different dates giving us "staggered rollout" 
-\end{itemize}
-
-\end{frame}
-
-
-
-
-
-
-
-
-
-\begin{frame}{Personals}
-
-\begin{figure}
-    \centering
-    \includegraphics[height=0.85\textheight]{./lecture_includes/melanie1}
-\end{figure}
-
-\end{frame}
-
-
-\begin{frame}{Personals}
-\begin{figure}
-    \centering
-    \includegraphics[height=0.5\textheight]{./lecture_includes/melanie2}
-\end{figure}
-
-\end{frame}
-
-\begin{frame}{Personals starts in San Francisco}
-\begin{figure}
-    \centering
-    \includegraphics[height=0.85\textheight]{./lecture_includes/melanie3}
-\end{figure}
-
-\end{frame}
-
-\begin{frame}{Personals begins spreading}
-\begin{figure}
-    \centering
-    \includegraphics[height=0.85\textheight]{./lecture_includes/melanie4}
-\end{figure}
-
-\end{frame}
-
-\begin{frame}{Personals gets larger}
-\begin{figure}
-    \centering
-    \includegraphics[height=0.85\textheight]{./lecture_includes/melanie5}
-\end{figure}
-
-\end{frame}
-
-\begin{frame}{Personals is popular!}
-\begin{figure}
-    \centering
-    \includegraphics[height=0.85\textheight]{./lecture_includes/melanie6}
-\end{figure}
-
-\end{frame}
-
-\begin{frame}{Personals is popular!}
-\begin{figure}
-    \centering
-    \includegraphics[height=0.85\textheight]{./lecture_includes/melanie7}
-\end{figure}
-
-\end{frame}
-
-\begin{frame}{Personals is popular!}
-\begin{figure}
-    \centering
-    \includegraphics[height=0.85\textheight]{./lecture_includes/melanie8}
-\end{figure}
-
-\end{frame}
-
-
-\begin{frame}{Our project}
-
-\begin{itemize}
-\item So we have geographic rollout from 2000 to 2010
-	\begin{enumerate}
-\item But after 2008, Great Recession leads to plummeting birth rates
-\item And after 2008, we have social media, smart phones, all of which maybe had their own independent effects on matching ("sex recessions")
-	\end{enumerate}
-\item So we will use 1995 (pre-treatment) to 2007 as our sample period
-\item But we will include the 2008-2010 "later treated counties" as our control group
-\item Used the wayback machine to get every county's craigslist start date (three of us and an RA!)
-\end{itemize}
-
-\end{frame}
-
-\begin{frame}{Recovery of Birth Rates (National vs. County)}
-    \centering
-    \begin{columns}
-        \column{0.5\textwidth}
-        \centering
-        \textbf{Average National Birth Rates}
-        \includegraphics[width=\linewidth,height=0.6\textheight,keepaspectratio]{./lecture_includes/national_br.png}
-        
-        \column{0.5\textwidth}
-        \centering
-        \textbf{Average County Birth Rates}
-        \includegraphics[width=\linewidth,height=0.6\textheight,keepaspectratio]{./lecture_includes/county_br.png}
-    \end{columns}
-\end{frame}
-
-
-\begin{frame}
-
-\begin{figure}
-    \centering
-    \includegraphics[height=0.6\textheight]{./lecture_includes/python_births.png}
-\end{figure}
-
-\end{frame}
-
-
-
-
-
-\begin{frame}[shrink=20]{Number of counties by treatment cohorts}
-\begin{table}[htbp]\centering
-\caption{Number of counties by year Craigslist personals appeared}\label{tab:countybycohort}
-\begin{tabular}{lc}
-\toprule
-\textbf{Treatment Cohort} & \textbf{Number of Counties Treated} \\
-\midrule
-Never treated&       1,779\\
-2000 cohort &           9\\
-2001 cohort &           5\\
-2002 cohort &          12\\
-2003 cohort &          36\\
-2004 cohort &          58\\
-2005 cohort &          69\\
-2006 cohort &         341\\
-2007 cohort &          65\\
-2008 cohort &          66\\
-2009 cohort &         215\\
-2010 cohort &           1\\
-\midrule
-Total counties &     2,656 \\
-\bottomrule
-\end{tabular}
-\end{table}
-\end{frame}
-
-
-\begin{frame}{Rollout of Craigslist's Personals}
-    \centering
-    \includegraphics[width=\textwidth,height=0.95\textheight,keepaspectratio]{./lecture_includes/rollout.png}
-\end{frame}
-
-\begin{frame}{Births by Treatment Cohort}
-    \includegraphics[width=\textwidth,height=0.9\textheight,keepaspectratio]{./lecture_includes/pretty_births.png}
-\end{frame}
-
-
-\begin{frame}{Estimator selection}
-
-\begin{itemize}
-
-\item We used CS to estimate the average effect of the rollout on birth rates 
-\item It's unweighted by population so "average effect on the average county for now
-\item We decided to make our control group the "2008-2010" as our control group because at least they were eventually treated, but doesn't really matter as never-treated gets same things
-\item First, I want to just illustrate for you the "short vs long difference" issue
-
-\end{itemize}
-
-\end{frame}
-
-
-
-
-
-\begin{frame}{Short gap event study, no covariates}
-
-\begin{figure}
-    \centering
-    \includegraphics[height=0.85\textheight]{./lecture_includes/es_births_shortnone.png}
-\end{figure}
-
-\end{frame}
-
-\begin{frame}{Long differences event study, no covariates}
-
-\begin{figure}
-    \centering
-    \includegraphics[height=0.85\textheight]{./lecture_includes/es_births_none}
-\end{figure}
-
-\end{frame}
-
-
-\begin{frame}{Trends or No Trends?!}
-
-\begin{figure}[htbp]
-    \centering
-    \begin{minipage}[b]{0.48\textwidth}
-        \centering
-    \includegraphics[height=0.45\textheight]{./lecture_includes/es_births_shortnone.png}
-        \caption{Short Gap}
-    \end{minipage}
-    \hfill
-    \begin{minipage}[b]{0.48\textwidth}
-        \centering
-    \includegraphics[height=0.45\textheight]{./lecture_includes/es_births_none}
-        \caption{Long Difference}
-    \end{minipage}
-\end{figure}
-
-\end{frame}
-
-
-\begin{frame}{Scrutinizing that event study}
-
-\begin{itemize}
-\item I was so excited when I saw those flat pre-trends until I learned that the default syntax in Stata's \texttt{csdid} calculated short gaps!
-\item We had a whole story that online dating caused "permanent dating" until I realized that!! lol
-\item But more than that -- was unconditional parallel trends really plausible?  
-\item We are assuming the mean change in "untreated birth rates" is the same in our timing cohorts as the comparison cohort, but that assumes a particular "similar control group" and we have no covariates
-\end{itemize}
-\end{frame}
-
-
-
-\begin{frame}{Who got a Craigslist and who didn't?}
-
-\begin{itemize}
-
-\item Craigslist is this: \url{houston.craigslist.org} for Houston, Texas
-\item I grew up in a town in Mississippi called Brookhaven with a population of 11,000 and if you search for \url{brookhaven.craigslist.org} it's not there
-\item Craigslist targeted \emph{cities} but most of the US counties are \emph{rural}
-\end{itemize}
-
-\end{frame}
-
-
-
-\begin{frame}{Is Unconditional parallel trends plausible?}
-
-\begin{itemize}
-\item But my coauthors are demographers who focus a lot on maternal health and children, plus they're labor economists and they urban counties and rural counties differ:
-	\begin{itemize}
-	\item Cities have more college educated women, delayed childbearing, lower marriage rates, different racial composition, more access to female healthcare resources
-	\item Rural towns have lower educated women, earlier age at first birth, higher marriage rates, more homogenous, worse healthcare access
-	\end{itemize}
-\item If Craigslist counties are more urban, then our treatment and control are imbalance on covariates that cause trends in $Y^0$
-\item Let's look at mean female population and urban measures by timing cohort
-\end{itemize}
-
-\end{frame}
-
-
-\begin{frame}{Female population by timing cohort}
-
-\begin{figure}
-    \centering
-    \includegraphics[height=0.85\textheight]{./lecture_includes/pretty_fempop}
-\end{figure}
-
-\end{frame}
-
-
-\begin{frame}{Urban and rural counties by timing cohort}
-
-\begin{figure}
-    \centering
-    \includegraphics[height=0.85\textheight]{./lecture_includes/pretty_RUCC}
-\end{figure}
-
-\end{frame}
-
-
-
-\begin{frame}{Control for 9-digit urban code}
-
-\begin{itemize}
-
-\item So we decided -- and I still remember this day -- to just include one variable
-\item 9-digit RUCC code measuring "how urban is the county?"
-	\begin{itemize}
-	\item RUCC code of 1: VERY URBAN (e.g., San Francisco)
-	\item RUCC code of 9: VERY RURAL (e.g., Brookhaven)
-	\end{itemize}
-\item Effectively, what is happening when we do this, it is as though we are estimating CS for 1s, 2s, 3s, and so on
-\item Our control group is so large they have \emph{every RUCC code}
-\item So, we estimate CS with 8 RUCC dummies (more dramatic if I show it to you)
-\end{itemize}
-
-\end{frame}
-
-
-
-
-\begin{frame}{Long Differences, with and without RUCC dummies}
-
-\begin{figure}
-    \centering
-    \includegraphics[height=0.85\textheight]{./lecture_includes/es_br1544_combined.png}
-\end{figure}
-
-\end{frame}
-
-\begin{frame}{Now put yourself in my shoes!}
-
-\begin{figure}[htbp]
-    \centering
-    \begin{minipage}[b]{0.48\textwidth}
-        \centering
-    \includegraphics[height=0.45\textheight]{./lecture_includes/es_births_shortnone}
-        \caption{Short Gap, no covariates}
-    \end{minipage}
-    \hfill
-    \begin{minipage}[b]{0.48\textwidth}
-        \centering
-    \includegraphics[height=0.45\textheight]{./lecture_includes/es_births_RUCC.png}
-        \caption{Long Difference, 8 RUCC dummies}
-    \end{minipage}
-\end{figure}
-
-\end{frame}
-
-\begin{frame}{Any more covariates?}
-
-\begin{itemize}
-
-\item So then we started asking ourselves -- is urban enough?  And how will we decide?
-\item We decided we urban dummies captured a lot of things, but we wanted more, but what and how will we decide so limit specification searching
-\item We decided to LASSO on $\Delta Birth\_rates$ using only the pretreatment periods because $\Delta Y_{t-\tau} = \Delta Y^0_{t-\tau}$ then 
-
-\end{itemize}
-
-\end{frame}
-
-\begin{frame}{Specific LASSO steps}
-
-\begin{enumerate}
-\item Regress birth rates on state-year interactions for 1995-1999 (pre-treatment)
-\item Took first difference per county for residuals
-\item LASSO regression of first difference residuals (county-level)
-\item Cross validation
-\end{enumerate}
-
-LASSO selected male to female sex ratio, per capita income, and unemployment rates (out of 11 covariates)
-
-\end{frame}
-
-\begin{frame}{CS estimator with 8 RUCC codes, sex ratio, per capita income and unemployment rate}
-
-\begin{figure}
-    \centering
-    \includegraphics[height=0.85\textheight]{./lecture_includes/lasso_br1544}
-\end{figure}
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Yikes!}
-
-\begin{itemize}
-\item What's going on?  Overlap problems
-\item We are creating "separation" caused by curse of dimensionality
-\item All of the propensity scores are ending up not overlapping
-\item So we had to discretize the covariates into quantiles
-\end{itemize}
-
-\end{frame}
-
-
-\begin{frame}{CS estimator with 8 RUCC codes, sex ratio, per capita income and unemployment rate quantiles}
-
-\begin{figure}
-    \centering
-    \includegraphics[height=0.85\textheight]{./lecture_includes/es_births_allX.png}
-\end{figure}
-
-\end{frame}
-
-\begin{frame}{Interpreting those late lags}
-
-\begin{itemize}
-\item We have staggered rollout -- why does that matter?
-\item All cohorts contribute $t=0$, but we lose one cohort at each lag
-\item We don't find positive effects until 3rd lag and there's two things happening
-	\begin{enumerate}
-	\item On the one hand, it takes at least 9 months after meeting "the one" to have a child, so lags are reassuring
-	\item On the other hand, CS is literally losing cohorts with each lag so mechanical sample selection
-	\end{enumerate}
-
-\end{itemize}
-
-\end{frame}
-
-
-\begin{frame}[shrink=20]{Number of counties by treatment cohorts}
-\begin{table}[htbp]\centering
-\caption{Number of counties by year Craigslist personals appeared}\label{tab:countybycohort}
-\begin{tabular}{lc}
-\toprule
-\textbf{Treatment Cohort} & \textbf{Number of Counties Treated} \\
-\midrule
-Never treated&       1,779\\
-2000 cohort &           9\\
-2001 cohort &           5\\
-2002 cohort &          12\\
-2003 cohort &          36\\
-2004 cohort &          58\\
-2005 cohort &          69\\
-2006 cohort &         341\\
-2007 cohort &          65\\
-2008 cohort &          66\\
-2009 cohort &         215\\
-2010 cohort &           1\\
-\midrule
-Total counties &     2,656 \\
-\bottomrule
-\end{tabular}
-\end{table}
-\end{frame}
-
-\begin{frame}{Differentially sized cohorts}
-
-\begin{itemize}
-\item But there's more -- those "late adopters" are \emph{massive} which in CS is causing that alone them to shift the effects
-\item Simple ATT is not significant with the 2006 cohort, but it is when it's gone
-\item But it's just size -- those late adopters are \emph{rural}, they are \emph{much later}
-\item Lots of different things about them and we are working on that now
-\end{itemize}
-
-\end{frame}
-
-
-\begin{frame}{Writing this up will be horrible!}
-
-\begin{itemize}
-
-\item I don't mind showing you all this because it's a workshop about doing the work
-\item Mark and Dan are going to talk about writing the papers!
-\item But, we have \emph{no idea} how we are going to somehow collect all of this and make one coherent paper (we will be taking Mark and Dan's hidden curriculum workshop!)
-\item Point is, though, that that's a different part of the process -- we want to understand \emph{mechanically} what CS is doing, \emph{numerically} the calculations (e.g., the weighting, the "dropping out cohorts")
-\item We don't just want to jump to some gestation story in other words
-\end{itemize}
-
-\end{frame}
-
-
-
-\begin{frame}{Be Curious, Not Judgment -- Ted Lasso}
-
-\begin{itemize}
-
-\item Do everything you can to figure out the treatment assignment mechanism 
-\item Shoeleather dominates technical knowledge (Rubin 2008 "Design Trumps Analysis"; Freedman 1991)
-\item Consider interviewing key people!  But don't ask them if they randomized -- they don't know what that word means
-\item Ask them "hey, why did you do that thing you did?" or "hey, why did some people get put into your program but not others?"
-\end{itemize}
-
-\end{frame}
-
-\begin{frame}[shrink=20]
-    \centering
-    \begin{center}
-    \begin{figure}
-        \includegraphics[width=\textwidth]{./lecture_includes/craig_dm}
-    \end{figure}
-    \end{center}
-    
-
-    
-\end{frame}
-
-
-
-
-\section{Honest DiD}
+\subsection{Honest DID}
 '
 \begin{frame}{Sensitivity Analysis}
 

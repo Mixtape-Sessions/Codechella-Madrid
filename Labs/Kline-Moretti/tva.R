@@ -7,8 +7,11 @@ library(did) # install.packages("did")
 
 # Data is county-by-year panel
 df = read_csv("data/tva.csv")
-glimpse(df)
 df = df |> filter(county_has_no_missing)
+glimpse(df)
+
+# D_i = treated unit
+# d_{it} = actively under going treatment (treat x post)
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Making data wide ----
@@ -39,10 +42,15 @@ feols(
   data = df |> filter(year == 1960 | year == 1940),
   vcov = "HC1"
 )
+feols(
+  ln_manufacturing ~ i(tva * post) | post + tva,
+  data = df |> filter(year == 1960 | year == 1940),
+  vcov = "HC1"
+)
 
 # \Delta Y on TVA dummy
 feols(
-  ln_manufacturing_1960 - ln_manufacturing_1940 ~ i(tva),
+  ln_manufacturing_1960 - ln_manufacturing_1940 ~ 1 + i(tva),
   data = df_wide,
   vcov = "HC1"
 )
@@ -50,7 +58,7 @@ feols(
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Pre-trends ----
 feols(
-  ln_manufacturing_1930 - ln_manufacturing_1940 ~ i(tva),
+  ln_manufacturing_1930 - ln_manufacturing_1940 ~ 1 + i(tva),
   data = df_wide,
   vcov = "HC1"
 )
@@ -134,7 +142,6 @@ mean(Delta_y[D == 1]) - mean(Delta_y0_hat[D == 1])
 X = model.matrix(
   ~ agriculture_share_1930 +
     manufacturing_share_1930 +
-    ln_avg_farm_value_1930 +
     white_share_1930 +
     white_share_1930_sq,
   data = df_wide
@@ -201,10 +208,42 @@ DRDID::drdid_panel(
 
 ## Pre-trend DRDID estimates ----
 DRDID::drdid_panel(
+  y1 = df_wide$ln_manufacturing_1920,
+  y0 = df_wide$ln_manufacturing_1940,
+  D = df_wide$tva,
+  covariates = X
+)
+DRDID::drdid_panel(
   y1 = df_wide$ln_manufacturing_1930,
   y0 = df_wide$ln_manufacturing_1940,
   D = df_wide$tva,
   covariates = X
+)
+DRDID::drdid_panel(
+  y1 = df_wide$ln_manufacturing_1950,
+  y0 = df_wide$ln_manufacturing_1940,
+  D = df_wide$tva,
+  covariates = X
+)
+DRDID::drdid_panel(
+  y1 = df_wide$ln_manufacturing_1960,
+  y0 = df_wide$ln_manufacturing_1940,
+  D = df_wide$tva,
+  covariates = X
+)
+DRDID::drdid_panel(
+  y1 = df_wide$ln_manufacturing_1960,
+  y0 = df_wide$ln_manufacturing_1940,
+  D = df_wide$tva,
+  covariates = cbind(rep(1, df_wide))
+)
+
+DRDID::drdid(
+  yname = "ln_manufacturing",
+  tname = "year",
+  idname = "county_code_numeric",
+  dname = "tva",
+  data = df |> filter(year == 1940 | year == 1960)
 )
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -224,7 +263,6 @@ df$g <- df$tva * 1945
   gname = "g",
   xformla = ~ agriculture_share_1930 +
     manufacturing_share_1930 +
-    ln_avg_farm_value_1930 +
     white_share_1930 +
     white_share_1930_sq,
   base_period = "universal", # use 1940 as the reference period!

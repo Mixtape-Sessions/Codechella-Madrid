@@ -53,8 +53,11 @@ predict te_est_linear if dose > 0, xb
 
 * Regress \Delta Y - count trend estimate on a spline
 cap drop _bsp_*
-makespline bspline dose
+makespline bspline dose if dose > 0
 reg Delta_y_diff _bsp_* dose if dose > 0
+
+* different non-parametric estimator for the treatment effect
+npregress kernel Delta_y_diff dose if dose > 0
 
 * Get points for plotting
 predict te_est_spline if dose > 0, xb
@@ -64,7 +67,7 @@ cap drop bin_*
 gen bin_1 = dose < 0.1
 gen bin_2 = dose >= 0.1 & dose < 0.2
 gen bin_3 = dose >= 0.2
-reg Delta_y_diff i.bin_1 i.bin_2 i.bin_3 if dose > 0
+reg Delta_y_diff i.bin_1 i.bin_2 i.bin_3 if dose > 0, nocons
 
 * Get points for plotting
 predict te_est_bins if dose > 0, xb

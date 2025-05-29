@@ -699,14 +699,26 @@ TWFE is no longer negative, interestingly, once we eliminate the last group (giv
 
 \begin{itemize}
 
-\item Interestingly, long differences and short gaps have the same information -- you can easily convert one into the other -- but one will show trends and the other won't
-\item So which one is right?  Remember -- parallel trends is a long difference, and all calculations are long differences, even in CS, so in my opinion so should the event study coefficients
-\item Plus remember -- TWFE invented the event study, long differences is what we expect, so it's a subtle switching out of visualizing pre-trends from our expectation
-\item Let's look at a simulation by Jon Roth (2024) where he build data with rising pre-trends which he then estimated with TWFE (long difference), CS (short gaps), dCDH (short gaps) and BJS (Kyle can discuss this tomorrow)
+\item Interestingly, long differences and short gaps have the same information -- you can easily convert one into the other -- but one will show trends and the other won't.
+\item So which one is right?  
+\item Remember -- parallel trends is a long difference, and all treatment effect calculations i are long differences, even in CS, so in my opinion so should the event study coefficients
+\item Plus remember -- because TWFE uses long differences, which therefore is what we have come to expect 
+\item Subtle switching out of visualizing pre-trends from our expectation
 
 \end{itemize}
 
 \end{frame}
+
+\begin{frame}{Roth simulation}
+
+\begin{itemize}
+\item Let's look at a simulation by Jon Roth (2024) 
+\item He generated the data with rising pre-trends 
+\item He then estimated with TWFE (long difference), CS (short gaps), dCDH (short gaps) and BJS (Kyle can discuss this tomorrow)
+\end{itemize}
+
+\end{frame}
+
 
 \begin{frame}{Short Gaps and Long Differences}
 
@@ -717,15 +729,15 @@ TWFE is no longer negative, interestingly, once we eliminate the last group (giv
 
 \end{frame}
 
-\begin{frame}{Stata Syntax}
+\begin{frame}{Software Syntax}
 
 \begin{itemize}
 
 \item Stata's \texttt{csdid} has default syntax where if you don't indicate which way to do it, it only does it using the short gap method
 \item And in the Stata user command from Stata 18, you actually \textbf{cannot} do short differences 
-\item You have to select \texttt{long2} in \texttt{csdid} and if you want short gaps, you do not specify anything
+\item You have to select \texttt{long2} in \texttt{csdid} and the universal baseline in R's \texttt{did} but if you want short gaps, you do not specify anything
 \item So what is going on is that since it's not documented well, \texttt{csdid} is very population, and default is short gaps, people are using short gaps and probably don't know, and don't explain it in the papers
-\item Here is an NBER that clearly uses short gaps -- with my hand I'll show you the long difference version of the same thing
+\item Here is an NBER WP and AER 2022 that are very clearly \emph{not} using long differences
 \end{itemize}
 
 \end{frame}
@@ -737,10 +749,22 @@ TWFE is no longer negative, interestingly, once we eliminate the last group (giv
 
 \begin{figure}
     \centering
-    \includegraphics[height=0.5\textheight]{./lecture_includes/magic_johnson_eventstudy}
+    \includegraphics[height=0.6\textheight]{./lecture_includes/magic_johnson_eventstudy}
 \end{figure}
 
 \end{frame}
+
+\begin{frame}
+
+\begin{figure}
+    \centering
+    \includegraphics[height=0.6\textheight]{./lecture_includes/facebook_3.png}
+\end{figure}
+
+\end{frame}
+
+
+
 
 
 \section{Checklists and My Online Dating Project}

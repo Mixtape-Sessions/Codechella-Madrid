@@ -386,7 +386,6 @@
   But it comes with some costs:
   \begin{itemize}
     \item Annoying and error-prone; interacting a bunch of terms; bunch of for loops; make sure you filter dataset right; hard to write up and hard to read; etc.
-    \item 
     \item Identifies a convex-average of $\tau_{it}$ but the weights are non-standard and data-dependent (e.g. can change by adding more pre-periods)
   \end{itemize}
 \end{frame}
@@ -427,7 +426,7 @@
   Imputation estimators offer a few benefits:
   \begin{itemize}
     \item They allow you to transparently write down your model for the untreated potential outcome and estimate that model
-    \item They naturally adapt to more complex settings beyond the two-way fixed effect model (next sections)
+    \item They naturally adapt to more complex models for $Y_{it}(0)$ beyond the two-way fixed effect model (next sections)
   \end{itemize}
 \end{frame}
 
@@ -543,7 +542,7 @@
   $$
 
   \bigskip\bigskip
-  Can we estimate this and use our imputation procedure:
+  Can we estimate this and use our imputation procedure?
   \begin{itemize}
     \item The short-answer is yes. There is a bunch of different approaches but they're not as simple as TWFE.
 

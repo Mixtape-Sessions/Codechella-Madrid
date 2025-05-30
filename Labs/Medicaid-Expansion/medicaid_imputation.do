@@ -15,10 +15,11 @@ egen fips_numeric = group(fips)
 
 * Overall effect ----
 did2s pct_insured_total, first_stage(i.year) second_stage(ib0.rel_year_shift) treatment(treat) cluster(fips_numeric) unit(fips)
-
-* TODO: make this not ugly lol
 coefplot, vertical
 
+
+* e.g. rural/urban county event-study estimates
+* did2s pct_insured_total, first_stage(i.year) second_stage(ib0.rel_year_shift#i.urban) treatment(treat) cluster(fips_numeric) unit(fips)
 
 * Adding state-by-year time effects ----
 egen census_region_numeric = group(census_region)

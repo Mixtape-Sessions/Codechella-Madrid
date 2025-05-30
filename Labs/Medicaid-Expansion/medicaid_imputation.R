@@ -17,6 +17,16 @@ est_es <- did2s::did2s(
 )
 iplot(est_es)
 
+# e.g. rural/urban county event-study estimates
+# did2s::did2s(
+#   data = df,
+#   yname = "pct_insured_total",
+#   first_stage = ~ 0 | year + fips,
+#   second_stage = ~ i(rel_year, i.urban, ref = -15),
+#   treatment = "treat",
+#   cluster_var = "fips"
+# )
+
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Adding census region-by-year time effects ----
 est_es <- did2s::did2s(

@@ -609,10 +609,34 @@ Now the comparison group's Post outcome is also $Y(1)$, not $Y(0)$. Switching eq
 \begin{block}{Numerical example}
 ATT $= 10$, PT bias $= 0$, ATT$_{D{=}0,\text{Post}} = 4$. \quad $\widehat{\text{DiD}} = 10 - 4 = \mathbf{6}$. \;\highlight{biased toward zero}
 \end{block}
-\meta{Three cases, three failures of the punchline. The +0 trick still works --- only the zero you add changes.}
 \end{frame}
 
-%% --- 4.6 Summary: four ways the 2x2 decomposes ---
+%% --- 4.6 Case 4: always-treated comparison group ---
+\begin{frame}{Case 4: the comparison group is \textit{always} treated}
+\scriptsize
+The comparison group was treated \textit{before} our data starts. Both their Pre and Post outcomes are $Y(1)$, not $Y(0)$. Switching equation:
+\vspace{-0.3em}
+\[
+\widehat{\text{DiD}} \;=\; \big[\mathbb{E}[Y(1)|1,\text{Post}] - \mathbb{E}[Y(0)|1,\text{Pre}]\big] \;-\; \big[\mathbb{E}[Y(1)|0,\text{Post}] - \mathbb{E}[Y(1)|0,\text{Pre}]\big]
+\]
+\vspace{-1.0em}
+
+\textbf{Add two zeros} --- $\pm\,\mathbb{E}[Y(0)|0,\text{Post}]$ and $\pm\,\mathbb{E}[Y(0)|0,\text{Pre}]$ on the comparison side --- and rearrange:
+\vspace{-0.2em}
+\[
+\widehat{\text{DiD}} \;=\; \underbrace{\mathbb{E}[Y(1){-}Y(0)|1,\text{Post}]}_{\textstyle\text{\color{accent}\bfseries ATT}}
+   \;+\; \underbrace{\big\{\Delta\mathbb{E}[Y(0)|1] - \Delta\mathbb{E}[Y(0)|0]\big\}}_{\text{non-PT bias}\,=\,0\text{ under PT}}
+   \;-\; \underbrace{\Delta\,\text{ATT}_{D{=}0}}_{\text{\rmfamily\itshape change in comparison TE}}
+\]
+\vspace{-0.4em}
+
+\begin{block}{Numerical example}
+ATT $= 10$, PT bias $= 0$, $\Delta$ATT$_{D{=}0} = 2$. \quad $\widehat{\text{DiD}} = 10 - 2 = \mathbf{8}$. \;\highlight{biased toward zero}
+\end{block}
+\meta{Four cases, four failures of the punchline. The $+0$ trick still works --- only the zero you add changes.}
+\end{frame}
+
+%% --- 4.7 Summary: four ways the 2x2 decomposes ---
 \begin{frame}{Summary: four ways the 2$\times$2 decomposes}
 \vspace{0.4em}
 \small
@@ -1046,13 +1070,11 @@ County 1: eight people. \;County 2: two people. \;Compute the average $\delta$ f
 \begin{frame}{Two parameters, two answers}
 \vspace{0.4em}
 \footnotesize
-Scale the example up: \highlight{Texas, 254 counties, 30M people.} 5 biggest counties hold 41\% of the population. \;Half the population has $\delta_i \sim \mathcal{N}(+5, 1)$; half has $\delta_i \sim \mathcal{N}(-1, 0.5)$. So $\mathbb{E}[\delta] = +2$. Sort high-$\delta$ people into the 5 big counties.
+Scale the example up: \highlight{Texas, 254 counties, 30M people.} 5 biggest counties hold roughly half the population. Heterogeneous $\delta_i$ across people, with the high-$\delta$ folks concentrated in the 5 big counties and the low-$\delta$ folks in the 249 small ones.
 \vspace{0.5em}
 \begin{itemize}
-  \item \textbf{Per-person ATE}: $\;\tfrac{1}{N}\sum_i \delta_i$ --- weight every person by $1/N$. \\
-        15M high-$\delta$ balance 15M low-$\delta$. \;\highlight{Answer: $+2$.}
-  \item \textbf{Avg of county ATEs}: $\tfrac{1}{254}\sum_c \overline{\delta}_c$ --- weight every county by $1/254$. \\
-        $\tfrac{5(+5) + 249(-1)}{254} = \;\highlight{-0.88}$. \;The 249 small counties dominate.
+  \item \textbf{Per-person ATE}: $\;\tfrac{1}{N}\sum_i \delta_i$ --- weight every person by $1/N$. \;\highlight{Answer: $+2$.}
+  \item \textbf{Avg of county ATEs}: $\tfrac{1}{254}\sum_c \overline{\delta}_c$ --- weight every county by $1/254$. \;\highlight{Answer: $-0.88$.}
 \end{itemize}
 \vspace{0.5em}
 \begin{center}
@@ -1073,6 +1095,45 @@ Random: every county's ATE equals the population's. \;\;
 $\delta$-sort: per-person line at $+2$, avg of county ATEs flips to \highlight{$-0.88$.} \\[0.15em]
 Random sorting is the benchmark --- rarely reality. People choose where to live, and on traits that move $\delta$.
 \end{center}
+\end{frame}
+
+%% --- 8.3c The weighted-mean formula ---
+\begin{frame}[fragile]{The weighted mean is a covariance correction}
+\vspace{0.4em}
+For any outcome $Y$ and any weight $S$:
+\vspace{-0.2em}
+\[
+\widetilde{\mathbb{E}}[Y] \;\equiv\; \frac{\mathbb{E}[S\,Y]}{\mathbb{E}[S]}
+\;\;=\;\; \mathbb{E}[Y] \;+\; \dfrac{\mathrm{Cov}(S,\,Y)}{\mathbb{E}[S]}
+\]
+\vspace{-0.4em}
+\begin{itemize}\setlength\itemsep{2pt}\footnotesize
+  \item Weighted mean $=$ unweighted mean $+$ a \highlight{covariance correction}.
+  \item $\mathrm{Cov}(S, Y) > 0 \Rightarrow$ weighted exceeds unweighted; $< 0 \Rightarrow$ smaller.
+  \item Ten-people table: weight by county size $S \in \{8, 2\}$ and compute $\widetilde{\mathbb{E}}[\delta]$.
+\end{itemize}
+\vspace{0.5em}
+\begin{columns}[T,onlytextwidth]
+\column{0.48\textwidth}
+\textbf{Stata}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+gen size = 8 if county==1
+replace size = 2 if county==2
+summarize delta [aweight=size]
+* weighted mean = +0.2
+summarize delta
+* unweighted mean = -0.25
+\end{lstlisting}
+\column{0.48\textwidth}
+\textbf{R}
+\begin{lstlisting}[language=R,basicstyle=\ttfamily\scriptsize]
+df$size <- ifelse(df$county==1, 8, 2)
+weighted.mean(df$delta, df$size)
+# weighted mean = +0.2
+mean(df$delta)
+# unweighted mean = -0.25
+\end{lstlisting}
+\end{columns}
 \end{frame}
 
 %% --- 8.4 Pick a target parameter ---
@@ -1252,79 +1313,48 @@ Y_{it} \;=\; \alpha_i \;+\; \tau_t \;+\; \sum_{t \neq t_0 - 1} \beta_t \cdot \bi
 \end{frame}
 
 %% --- 9.6 Tiny panel + by-hand calc (continues under §9) ---
-\begin{frame}{A tiny panel where you can do the math in your head}
-\footnotesize
-\textbf{Cell means $\overline{Y}_{g,t}$.} Two treated units (T), two controls (C). Treatment turns on in 2000.
-\vspace{0.4em}
-\begin{center}
-\renewcommand{\arraystretch}{1.2}
-\begin{tabular}{@{}lccccc@{}}
-\toprule
-\textbf{Year $t$} & $1997$ & $1998$ & $1999$ & $2000$ & $2001$ \\
-\midrule
-\textbf{Treated} \;$\overline{Y}^T_t$ & $7$ & $8$ & $9$ & $13$ & $16$ \\
-\textbf{Control} \;$\overline{Y}^C_t$ & $2$ & $3$ & $4$ & $5$ & $6$ \\
-\midrule
-$\overline{Y}^T_t - \overline{Y}^C_t$ & $5$ & $5$ & $5$ & $8$ & $10$ \\
-\bottomrule
-\end{tabular}
-\end{center}
-\vspace{0.5em}
-\begin{itemize}\setlength\itemsep{2pt}
-  \item Pre-period: T--C gap is constant at $5$. \;\highlight{Parallel trends.}
-  \item True ATT$(2000) = 3$, True ATT$(2001) = 5$.
-\end{itemize}
-\end{frame}
-
-%% --- 10.2 Each beta by hand, same via OLS ---
-\begin{frame}[fragile]{Each $\hat\beta_t$ by hand --- same numbers via OLS}
-\footnotesize
-Formula: \;$\hat\beta_t \;=\; (\overline{Y}^T_t - \overline{Y}^T_{1999}) - (\overline{Y}^C_t - \overline{Y}^C_{1999})$
-\vspace{0.4em}
+\begin{frame}[fragile]{Computing $\hat\beta_{2004}$ on \texttt{castle.dta} --- by hand vs.\ OLS}
+\vspace{0.1em}
+\footnotesize Castle doctrine cohort treated in 2006. Use 2005 as the omitted reference. The 2004 coefficient is one event-study 2$\times$2.
+\vspace{0.3em}
 \begin{columns}[T,onlytextwidth]
 \column{0.50\textwidth}
 \textbf{By hand}
-\vspace{0.2em}
+\begin{lstlisting}[basicstyle=\ttfamily\tiny]
+su l_homicide if treat==1 & year==2004
+* mean = 1.802504
+su l_homicide if treat==1 & year==2005
+* mean = 1.775398
+su l_homicide if treat==0 & year==2004
+* mean = 1.254353
+su l_homicide if treat==0 & year==2005
+* mean = 1.282884
+
+di (1.802504 - 1.775398) ///
+ - (1.254353 - 1.282884)
+\end{lstlisting}
 \begin{center}
-\renewcommand{\arraystretch}{1.3}
-\begin{tabular}{@{}lll@{}}
-\toprule
-$t$ & Calculation & $\hat\beta_t$ \\
-\midrule
-$1997$ & $(7{-}9) - (2{-}4)$ & $\mathbf{0}$ \\
-$1998$ & $(8{-}9) - (3{-}4)$ & $\mathbf{0}$ \\
-$2000$ & $(13{-}9) - (5{-}4)$ & $\mathbf{3}$ \\
-$2001$ & $(16{-}9) - (6{-}4)$ & $\mathbf{5}$ \\
-\bottomrule
-\end{tabular}
+\footnotesize $\hat\beta_{2004} =$ \highlight{$\mathbf{0.0556}$}
 \end{center}
 \column{0.50\textwidth}
-\textbf{Via OLS in R}
-\begin{lstlisting}[language=R,basicstyle=\ttfamily\scriptsize]
-library(fixest)
-feols(Y ~ i(year, treat,
-            ref = 1999) | unit + year,
-      data = toy)
+\textbf{Via OLS in Stata}
+\begin{lstlisting}[basicstyle=\ttfamily\tiny]
+reg l_homicide ///
+   treat##ib2005.year, ///
+   cluster(state)
+
+* Coefficient on
+*   1.treat#2004.year:
 \end{lstlisting}
-\vspace{0.2em}
 \begin{center}
-\renewcommand{\arraystretch}{1.15}
-\scriptsize
-\begin{tabular}{@{}lc@{}}
-\toprule
-coefficient & estimate \\
-\midrule
-\texttt{year::1997:treat} & $0$ \\
-\texttt{year::1998:treat} & $0$ \\
-\texttt{year::2000:treat} & $3$ \\
-\texttt{year::2001:treat} & $5$ \\
-\bottomrule
-\end{tabular}
+\footnotesize $\hat\beta_{2004} =$ \highlight{$\mathbf{0.05564}$}
 \end{center}
+\meta{Cluster-robust SE: 0.060. \;Match to 4 decimals.}
 \end{columns}
-\vspace{0.4em}
+\vspace{0.3em}
 \begin{center}
-\small\color{warmgray}\itshape OLS matches the manual 2$\times$2s to machine epsilon. \;The regression \textit{is} the formula.
+\footnotesize\color{warmgray}\itshape
+Every event-study coefficient is a 2$\times$2 \textit{relative to $t = -1$} (here, 2005).
 \end{center}
 \end{frame}
 
@@ -1333,18 +1363,37 @@ coefficient & estimate \\
 %% ===========================================================
 \remixsection{10.\ Five Pieces of a Strong DiD}
 
-%% --- 12.1 The five pieces ---
-\begin{frame}{Five pieces of a strong DiD}
+%% --- 10.1 SETUP: narrative + author + headline result ---
+\begin{frame}{Medicaid expansion and near-elderly mortality}
+\vspace{0.5em}
+\textbf{Miller, Johnson \& Wherry (2021),} \textit{Quarterly Journal of Economics}.
+\vspace{0.6em}
+\begin{itemize}\small\setlength\itemsep{0.4em}
+  \item Did the ACA Medicaid expansion (2014) reduce mortality among the \highlight{near-elderly} (ages 55--64)?
+  \item Comparison: states that expanded vs.\ states that didn't, before vs.\ after 2014.
+  \item Headline finding: \highlight{$\approx 9.2\%$ reduction} in near-elderly mortality.
+\end{itemize}
+\vspace{0.6em}
+\begin{block}{Why \textit{near}-elderly?}
+\small
+Everyone 65$+$ has Medicare --- Medicaid expansion is irrelevant for them. \;The elderly become a natural \highlight{placebo group} living in the same economies.
+\end{block}
+\vspace{0.4em}
+\meta{Today: walk through how they make the case using the five pieces of a strong DiD.}
+\end{frame}
+
+%% --- 10.2 Five pieces — start with BITE ---
+\begin{frame}{Five pieces of a strong DiD --- start with bite}
 \vspace{0.6em}
 \begin{enumerate}
   \item \textbf{\color{accent}Bite} --- the policy actually changed what it was supposed to change.
-  \item \textbf{\color{accent}Event study} --- pre/post coefficients around treatment.
-  \item \textbf{\color{accent}Falsification} --- run a rival theory on a placebo group or outcome and try to reject \textit{it}.
-  \item \textbf{\color{accent}Main result} --- the DiD on the actual outcome.
-  \item \textbf{\color{accent}Mechanism} --- the causal pathway from $D$ to $Y$.
+  \item \textbf{\color{warmgray!40}Event study} \textcolor{warmgray!40}{--- pre/post coefficients around treatment.}
+  \item \textbf{\color{warmgray!40}Falsification} \textcolor{warmgray!40}{--- run a rival theory on a placebo group or outcome.}
+  \item \textbf{\color{warmgray!40}Main result} \textcolor{warmgray!40}{--- the DiD on the actual outcome.}
+  \item \textbf{\color{warmgray!40}Mechanism} \textcolor{warmgray!40}{--- the causal pathway from $D$ to $Y$.}
 \end{enumerate}
 \vspace{0.6em}
-\meta{The point estimate alone is a case so weak that readers and the public are justified to reject it.}
+\meta{If the policy didn't actually move what it was supposed to move, nothing downstream is attributable to it.}
 \end{frame}
 
 %% --- 12.2 Bite #1 ---
@@ -1386,7 +1435,21 @@ Three measures (Medicaid up, any-insurance up, uninsured down) converge on the s
 \end{center}
 \end{frame}
 
-%% --- 12.5 Falsification on 65+ ---
+%% --- 10.6 Five pieces — now FALSIFY ---
+\begin{frame}{Five pieces of a strong DiD --- now falsify}
+\vspace{0.6em}
+\begin{enumerate}
+  \item \textbf{\color{warmgray!40}Bite} \textcolor{warmgray!40}{--- the policy moved what it was supposed to move.} \;\textcolor{accent}{\textit{(established.)}}
+  \item \textbf{\color{warmgray!40}Event study} \textcolor{warmgray!40}{--- pre/post coefficients around treatment.}
+  \item \textbf{\color{accent}Falsification} --- run a rival theory on a placebo group or outcome and try to reject \textit{it}.
+  \item \textbf{\color{warmgray!40}Main result} \textcolor{warmgray!40}{--- the DiD on the actual outcome.}
+  \item \textbf{\color{warmgray!40}Mechanism} \textcolor{warmgray!40}{--- the causal pathway from $D$ to $Y$.}
+\end{enumerate}
+\vspace{0.6em}
+\meta{The rival: ``some 2014 shock hit expansion states.'' The falsification: run the same model on a group the policy shouldn't reach.}
+\end{frame}
+
+%% --- 10.7 Falsification on 65+ ---
 \begin{frame}{Falsification: same model, on the 65+ population --- no effect}
 \begin{center}
 \includegraphics[height=0.60\textheight,keepaspectratio]{figures/placebo_medicaid.png}
@@ -1399,25 +1462,53 @@ A rival theory (``some 2014 shock hit expansion states'') would predict a mortal
 \end{center}
 \end{frame}
 
-%% --- 12.6 Medicaid main result ---
-\begin{frame}{Medicaid expansion: $\approx 9.2\%$ reduction in near-elderly mortality}
-\vspace{0.4em}
-\textbf{Miller, Johnson \& Wherry (2021),} \textit{Quarterly Journal of Economics}.
-\vspace{0.4em}
-\begin{itemize}\small
-  \item Did the ACA Medicaid expansion (2014) reduce mortality among the \highlight{near-elderly} (55--64)?
-  \item Comparison: states that expanded vs.\ states that didn't, before vs.\ after 2014.
-  \item Pre-trends flat. Post-2014 mortality declines in expansion states.
-  \item Effect grows over time --- consistent with cumulative treatment for chronic conditions.
-\end{itemize}
-\vspace{0.5em}
-\begin{block}{Why \textit{near}-elderly?}
-\small
-Everyone 65$+$ has Medicare --- Medicaid expansion is irrelevant for them. \;The elderly become a natural \highlight{placebo group} living in the same economies.
-\end{block}
+%% --- 10.8 Five pieces — EVENT STUDY + MAIN RESULT ---
+\begin{frame}{Five pieces of a strong DiD --- the event study and main result}
+\vspace{0.6em}
+\begin{enumerate}
+  \item \textbf{\color{warmgray!40}Bite} \textcolor{warmgray!40}{--- established.}
+  \item \textbf{\color{accent}Event study} --- pre/post coefficients around treatment.
+  \item \textbf{\color{warmgray!40}Falsification} \textcolor{warmgray!40}{--- rival rejected.}
+  \item \textbf{\color{accent}Main result} --- the DiD on the actual outcome.
+  \item \textbf{\color{warmgray!40}Mechanism} \textcolor{warmgray!40}{--- the causal pathway from $D$ to $Y$.}
+\end{enumerate}
+\vspace{0.6em}
+\meta{Now we look at the outcome that matters: mortality. The event study \textit{is} the main result, viewed in motion.}
 \end{frame}
 
-%% --- 12.3 All five present ---
+%% --- 10.9 Main result event study ---
+\begin{frame}{The main result: $\approx 9.2\%$ reduction in near-elderly mortality}
+\begin{center}
+\includegraphics[height=0.54\textheight,keepaspectratio]{figures/Miller_Medicaid4.png}
+\end{center}
+\vspace{-0.1em}
+\footnotesize
+\begin{itemize}\setlength\itemsep{2pt}
+  \item Post-2014: mortality declines in expansion states. \;\highlight{$\approx 9.2\%$ reduction.}
+  \item Pre-period dots near zero, but \textbf{CIs are wide} --- you cannot reject a straight line trending downward (\textit{Rambachan \& Roth 2024} sensitivity).
+  \item The other four pieces are why the editors believed it. A critic now has to explain bite \textit{and} falsification \textit{and} the dynamic post-trend --- not just one thing.
+\end{itemize}
+\end{frame}
+
+%% --- 10.10 Five pieces — MECHANISM ---
+\begin{frame}{Five pieces of a strong DiD --- and the fifth: mechanism}
+\vspace{0.3em}
+\begin{enumerate}\setlength\itemsep{1pt}
+  \item \textbf{\color{warmgray!40}Bite} \textcolor{warmgray!40}{--- established.}
+  \item \textbf{\color{warmgray!40}Event study} \textcolor{warmgray!40}{--- established.}
+  \item \textbf{\color{warmgray!40}Falsification} \textcolor{warmgray!40}{--- rival rejected.}
+  \item \textbf{\color{warmgray!40}Main result} \textcolor{warmgray!40}{--- 9.2\% reduction in near-elderly mortality.}
+  \item \textbf{\color{accent}Mechanism} --- the causal pathway from $D$ to $Y$.
+\end{enumerate}
+\vspace{0.5em}
+\begin{itemize}\setlength\itemsep{2pt}\small
+  \item Mechanisms are the part of a result that's \highlight{transportable} --- they extend across contexts where the same pathway operates.
+  \item Reduced-form top-line results often combine \textit{several} mechanisms, which makes interpretation harder.
+  \item Here: disease-related deaths fall and compound, consistent with treated chronic conditions.
+\end{itemize}
+\end{frame}
+
+%% --- 10.11 All five present (recap, optional) ---
 \begin{frame}{The five pieces, all five present in Medicaid}
 \vspace{0.4em}
 \begin{center}

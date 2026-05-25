@@ -1,49 +1,43 @@
-\frametitle{Each $\hat \beta _t$ by hand --- same numbers via OLS}
-\footnotesize
-Formula: \;$\hat\beta_t \;=\; (\overline{Y}^T_t - \overline{Y}^T_{1999}) - (\overline{Y}^C_t - \overline{Y}^C_{1999})$
-\vspace{0.4em}
+\frametitle{Computing $\hat \beta _{2004}$ on \texttt {castle.dta} --- by hand vs.\ OLS}
+\vspace{0.1em}
+\footnotesize Castle doctrine cohort treated in 2006. Use 2005 as the omitted reference. The 2004 coefficient is one event-study 2$\times$2.
+\vspace{0.3em}
 \begin{columns}[T,onlytextwidth]
 \column{0.50\textwidth}
 \textbf{By hand}
-\vspace{0.2em}
+\begin{lstlisting}[basicstyle=\ttfamily\tiny]
+su l_homicide if treat==1 & year==2004
+* mean = 1.802504
+su l_homicide if treat==1 & year==2005
+* mean = 1.775398
+su l_homicide if treat==0 & year==2004
+* mean = 1.254353
+su l_homicide if treat==0 & year==2005
+* mean = 1.282884
+
+di (1.802504 - 1.775398) ///
+ - (1.254353 - 1.282884)
+\end{lstlisting}
 \begin{center}
-\renewcommand{\arraystretch}{1.3}
-\begin{tabular}{@{}lll@{}}
-\toprule
-$t$ & Calculation & $\hat\beta_t$ \\
-\midrule
-$1997$ & $(7{-}9) - (2{-}4)$ & $\mathbf{0}$ \\
-$1998$ & $(8{-}9) - (3{-}4)$ & $\mathbf{0}$ \\
-$2000$ & $(13{-}9) - (5{-}4)$ & $\mathbf{3}$ \\
-$2001$ & $(16{-}9) - (6{-}4)$ & $\mathbf{5}$ \\
-\bottomrule
-\end{tabular}
+\footnotesize $\hat\beta_{2004} =$ \highlight{$\mathbf{0.0556}$}
 \end{center}
 \column{0.50\textwidth}
-\textbf{Via OLS in R}
-\begin{lstlisting}[language=R,basicstyle=\ttfamily\scriptsize]
-library(fixest)
-feols(Y ~ i(year, treat,
-            ref = 1999) | unit + year,
-      data = toy)
+\textbf{Via OLS in Stata}
+\begin{lstlisting}[basicstyle=\ttfamily\tiny]
+reg l_homicide ///
+   treat##ib2005.year, ///
+   cluster(state)
+
+* Coefficient on
+*   1.treat#2004.year:
 \end{lstlisting}
-\vspace{0.2em}
 \begin{center}
-\renewcommand{\arraystretch}{1.15}
-\scriptsize
-\begin{tabular}{@{}lc@{}}
-\toprule
-coefficient & estimate \\
-\midrule
-\texttt{year::1997:treat} & $0$ \\
-\texttt{year::1998:treat} & $0$ \\
-\texttt{year::2000:treat} & $3$ \\
-\texttt{year::2001:treat} & $5$ \\
-\bottomrule
-\end{tabular}
+\footnotesize $\hat\beta_{2004} =$ \highlight{$\mathbf{0.05564}$}
 \end{center}
+\meta{Cluster-robust SE: 0.060. \;Match to 4 decimals.}
 \end{columns}
-\vspace{0.4em}
+\vspace{0.3em}
 \begin{center}
-\small\color{warmgray}\itshape OLS matches the manual 2$\times$2s to machine epsilon. \;The regression \textit{is} the formula.
+\footnotesize\color{warmgray}\itshape
+Every event-study coefficient is a 2$\times$2 \textit{relative to $t = -1$} (here, 2005).
 \end{center}

@@ -1,0 +1,73 @@
+%% madrid_theme.sty -- Codechella Madrid 2026 theme overrides for remix.sty
+%% Load AFTER remix.sty. Provides:
+%%   1. Madrid color palette (replaces Glasgow green throughout)
+%%   2. Codechella footer + section-divider venue string
+%%   3. codechellatitle{Title}{Subtitle}{Author}{Venue} -- banner title frame
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{madrid_theme}[2026/05/25 v1.0 Codechella Madrid theme]
+
+\RequirePackage{tikz}
+\RequirePackage{graphicx}
+
+%% ----- 1. Madrid palette -----
+\definecolor{madridterracotta}{HTML}{C44536}
+\definecolor{madridtwilight}{HTML}{2C3E5C}
+\definecolor{madridpeach}{HTML}{FBE5D0}
+\definecolor{madridgold}{HTML}{C9982A}
+\definecolor{madridcream}{HTML}{FAF6EE}
+
+\colorlet{remixgreen}{madridterracotta}
+\colorlet{remixgreendark}{madridtwilight}
+\colorlet{remixgreenlight}{madridpeach}
+\colorlet{forest}{madridgold}
+\colorlet{accent}{madridterracotta}
+\colorlet{accentdark}{madridtwilight}
+\colorlet{cream}{madridcream}
+
+\setbeamercolor{structure}{fg=accent}
+\setbeamercolor{alerted text}{fg=accent}
+\setbeamercolor{itemize item}{fg=accent}
+\setbeamercolor{itemize subitem}{fg=accent}
+\setbeamercolor{enumerate item}{fg=accent}
+\setbeamercolor{enumerate subitem}{fg=accent}
+\setbeamercolor{block title alerted}{fg=charcoal,bg=remixgreenlight}
+\setbeamercolor{block body alerted}{fg=slate,bg=remixgreenlight}
+
+%% ----- 2. Codechella footer + section-divider venue -----
+\renewcommand{\remixfooter}{Codechella Madrid 2026\,\textperiodcentered\,CUNEF\,\textperiodcentered\,May 25--28}
+\renewcommand{\remixsectionvenue}{Codechella Madrid \textperiodcentered\ May 2026}
+
+%% ----- 3. codechellatitle{Title}{Subtitle}{Author}{Venue} -----
+\newcommand{\codechellatitle}[4]{%
+  \begingroup
+  \setbeamertemplate{footline}{}
+  \begin{frame}[plain]
+    \begin{tikzpicture}[remember picture,overlay]
+      \fill[cream] (current page.south west) rectangle (current page.north east);
+      \begin{scope}
+        \clip (current page.north west) rectangle ([yshift=-0.55\paperheight]current page.north east);
+        \node[anchor=north,inner sep=0pt] at (current page.north) {%
+          \includegraphics[width=\paperwidth]{codechella_2026.jpg}%
+        };
+      \end{scope}
+      \draw[accent,line width=1pt]
+        ([yshift=-0.555\paperheight]current page.north west) --
+        ([yshift=-0.555\paperheight]current page.north east);
+      \node[anchor=north,text width=0.85\paperwidth,align=center] at ([yshift=-0.575\paperheight]current page.north) {%
+        {\color{accent}\fontsize{9pt}{11pt}\selectfont\bfseries\MakeUppercase{Codechella Madrid 2026}\par}%
+        \vspace{0.3em}
+        {\color{charcoal}\bfseries\fontsize{20pt}{24pt}\selectfont #1\par}%
+        \vspace{0.25em}
+        {\color{warmgray}\itshape\fontsize{12pt}{14pt}\selectfont #2\par}%
+        \vspace{0.8em}
+        {\color{charcoal}\fontsize{10.5pt}{13pt}\selectfont #3\par}%
+        \vspace{0.1em}
+        {\color{warmgray}\fontsize{9.5pt}{12pt}\selectfont #4\par}%
+      };
+    \end{tikzpicture}
+  \end{frame}
+  \endgroup
+}
+
+\endinput

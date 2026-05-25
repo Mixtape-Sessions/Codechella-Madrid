@@ -1,0 +1,17 @@
+\frametitle{baker\_cs.do --- the implementation}
+\begin{lstlisting}[language=Stata,basicstyle=\ttfamily\scriptsize]
+* Get the same baker data, fit CS with DR-DiD
+ssc install csdid, replace
+ssc install drdid, replace
+
+csdid y, ivar(id) time(year) gvar(treat_date) ipw long2
+
+* Four aggregations, four answers:
+csdid_estat simple      // simple ATT across all cells
+csdid_estat group       // ATT(g) per cohort
+csdid_estat calendar    // ATT by calendar period
+csdid_estat event       // event-time profile
+\end{lstlisting}
+
+\vspace{0.5em}
+\meta{Building blocks first, aggregation second. \;\texttt{collegio-carlo-alberto/labs/Baker/Solutions/baker\_cs.do}.}

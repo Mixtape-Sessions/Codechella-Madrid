@@ -6,33 +6,7 @@
 
 \documentclass[aspectratio=169,11pt]{beamer}
 \usepackage{remix}
-
-%% ===========================================================
-%% MADRID PALETTE — Sunset on Gran Vía
-%% Replaces the Glasgow green scheme with warm terracotta + twilight navy
-%% ===========================================================
-\definecolor{madridterracotta}{HTML}{C44536}  % Primary accent — Iberian terracotta
-\definecolor{madridtwilight}{HTML}{2C3E5C}    % Section headers — twilight sky navy
-\definecolor{madridpeach}{HTML}{FBE5D0}       % Tints, alert blocks — sunset peach
-\definecolor{madridgold}{HTML}{C9982A}        % Secondary accent — Spanish gold
-\definecolor{madridcream}{HTML}{FAF6EE}       % Background — warm cream
-%% Remap remix.sty's green-based palette to Madrid colors
-\colorlet{remixgreen}{madridterracotta}
-\colorlet{remixgreendark}{madridtwilight}
-\colorlet{remixgreenlight}{madridpeach}
-\colorlet{forest}{madridgold}
-\colorlet{accent}{madridterracotta}
-\colorlet{accentdark}{madridtwilight}
-\colorlet{cream}{madridcream}
-%% Refresh beamer color templates that were locked at load time
-\setbeamercolor{structure}{fg=accent}
-\setbeamercolor{alerted text}{fg=accent}
-\setbeamercolor{itemize item}{fg=accent}
-\setbeamercolor{itemize subitem}{fg=accent}
-\setbeamercolor{enumerate item}{fg=accent}
-\setbeamercolor{enumerate subitem}{fg=accent}
-\setbeamercolor{block title alerted}{fg=charcoal,bg=remixgreenlight}
-\setbeamercolor{block body alerted}{fg=slate,bg=remixgreenlight}
+\usepackage{madrid_theme}
 
 \usepackage{tikz}
 \usetikzlibrary{positioning,arrows.meta,calc,shapes.geometric,fit,backgrounds}
@@ -102,49 +76,13 @@
   xrightmargin=0.4em,
 }
 
-%% Footer + section divider venue
-\renewcommand{\remixfooter}{Codechella Madrid 2026\,\textperiodcentered\,CUNEF\,\textperiodcentered\,May 25--28}
-\renewcommand{\remixsectionvenue}{Codechella Madrid \textperiodcentered\ May 2026}
-
 \begin{document}
 
-%% ===========================================================
-%% TITLE — Madrid banner override of \remixtitleframe
-%% Uses codechella_2026.jpg as a top banner; title text below.
-%% ===========================================================
-\begingroup
-\setbeamertemplate{footline}{}
-\begin{frame}[plain]
-  \begin{tikzpicture}[remember picture,overlay]
-    %% Cream background
-    \fill[cream] (current page.south west) rectangle (current page.north east);
-    %% Banner: Madrid skyline at the top, full width.
-    %% Clipped to top 55% of slide so the photo doesn't bleed into the title text.
-    \begin{scope}
-      \clip (current page.north west) rectangle ([yshift=-0.55\paperheight]current page.north east);
-      \node[anchor=north,inner sep=0pt] at (current page.north) {%
-        \includegraphics[width=\paperwidth]{codechella_2026.jpg}%
-      };
-    \end{scope}
-    %% Thin accent rule below the banner
-    \draw[accent,line width=1pt]
-      ([yshift=-0.555\paperheight]current page.north west) --
-      ([yshift=-0.555\paperheight]current page.north east);
-    %% Title block in the lower zone
-    \node[anchor=north,text width=0.85\paperwidth,align=center] at ([yshift=-0.575\paperheight]current page.north) {%
-      {\color{accent}\fontsize{9pt}{11pt}\selectfont\bfseries\MakeUppercase{Codechella Madrid 2026}\par}%
-      \vspace{0.3em}
-      {\color{charcoal}\bfseries\fontsize{20pt}{24pt}\selectfont Foundations of Difference-in-Differences\par}%
-      \vspace{0.25em}
-      {\color{warmgray}\itshape\fontsize{12pt}{14pt}\selectfont Day 1: The 2$\times$2, Parallel Trends, and Event Studies\par}%
-      \vspace{0.8em}
-      {\color{charcoal}\fontsize{10.5pt}{13pt}\selectfont Scott Cunningham \textperiodcentered\ Baylor University\par}%
-      \vspace{0.1em}
-      {\color{warmgray}\fontsize{9.5pt}{12pt}\selectfont CUNEF Auditorium \textperiodcentered\ May 25--28, 2026\par}%
-    };
-  \end{tikzpicture}
-\end{frame}
-\endgroup
+\codechellatitle
+  {Foundations of Difference-in-Differences}
+  {Day 1: The 2$\times$2, Parallel Trends, and Event Studies}
+  {Scott Cunningham \textperiodcentered\ Baylor University}
+  {CUNEF Auditorium \textperiodcentered\ May 25--28, 2026}
 
 %% ===========================================================
 %% HOUSEKEEPING — opening slides (welcome, team, mission, schedule, today, week)

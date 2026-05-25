@@ -1,0 +1,21 @@
+\frametitle{The simulation, one screen of R}
+\vspace{0.1em}
+\begin{lstlisting}[language=R,basicstyle=\ttfamily\scriptsize]
+N  <- 1000
+X1 <- rnorm(N); X2 <- rnorm(N)
+p  <- plogis(0.5*X1 + 0.3*X2 - 0.2)        # true propensity
+D  <- rbinom(N, 1, p)
+Y0 <- X1 + 0.5*X2 + rnorm(N)
+Y1 <- Y0 + (1 + 0.5*X1)                    # heterogeneous tau(X)
+Y  <- D*Y1 + (1-D)*Y0
+
+phat <- glm(D ~ X1 + X2, family=binomial)$fitted.values
+
+# Method A: IPW -- reweight controls
+w  <- ifelse(D==1, 1, phat/(1-phat))
+A  <- mean(Y[D==1]) - weighted.mean(Y[D==0], w[D==0])
+
+# Method B: regression with pscore as a control
+B  <- coef(lm(Y ~ D + phat))["D"]          # <-- the trap
+\end{lstlisting}
+\meta{Full simulation: \texttt{decks/code/IPW-Demo/ipw\_simulation.R}}

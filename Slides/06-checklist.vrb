@@ -1,0 +1,23 @@
+\frametitle{Step 9 (cont.): the code}
+\vspace{0.15cm}
+
+The Stata implementation is the \texttt{honestdid} package (Rambachan, Roth, Wing). \;Two steps:
+
+\begin{lstlisting}[language=Stata]
+* 1. Estimate the CS event study with long2 / universal baseline
+csdid2 homicide_rate $controls, gvar(g) ivar(cod) ///
+    time(ano) long2 method(drimp) notyet
+estat event, window(-4 5)
+
+* 2. Run the sensitivity analysis on the post-period average
+matrix l_vec = J(1, 1, 1)        // weight on Post_avg
+honestdid, pre(3/5) post(2/2) ///
+    mvec(0(0.25)2) delta(rm)  ///
+    l_vec(l_vec) b(e(b)) vcov(e(V))
+\end{lstlisting}
+
+\vspace{0.1em}
+\begin{itemize}\scriptsize\setlength\itemsep{0pt}
+  \item \texttt{mvec(0(0.25)2)}: sweep $M$ from 0 to 2 in steps of 0.25.
+  \item \texttt{delta(rm)}: relative-magnitudes restriction (the standard choice).
+\end{itemize}

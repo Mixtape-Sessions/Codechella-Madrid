@@ -1,0 +1,21 @@
+\frametitle{The \texttt {contdid} package}
+\vspace{0.2cm}
+
+Brantly Callaway's R package \texttt{contdid} implements all three options.
+
+\begin{lstlisting}[language=Rcode]
+library(contdid)
+result <- cont_did(
+  yname = "outcome", tname = "year", idname = "unit_id",
+  dname = "dose",    gname = "treatment_timing",
+  data = panel_data,
+  target_parameter  = "level",     # "level" = ATT(d|d); "derivative" = ACRT
+  aggregation       = "dose",      # or "overall"
+  control_group     = "notyettreated"
+)
+summary(result)
+ggcont_did(result, type = "att")
+\end{lstlisting}
+
+\vspace{0.1em}
+\meta{\texttt{"derivative"} requires strong PT; \texttt{"level"} only standard PT.}

@@ -1,0 +1,20 @@
+\frametitle{Spec E: DR-DiD (Sant'Anna \& Zhao 2020)}
+\textbf{Assumption.} \;Conditional PT, AND \textit{either} $\hat\mu_0$ or $\hat p(X)$ is correct (not both required).
+\vspace{0.3em}
+
+\textbf{Run --- by hand (in wide-FD form, \texttt{phat}/\texttt{dy\_hat} already computed):}
+\begin{lstlisting}[language={[ANSI]C},basicstyle=\ttfamily\scriptsize]
+gen dr_t = ever_treated * (dy - dy_hat) / `pr_treat'
+gen dr_c = (1 - ever_treated) * (phat/(1-phat)) * (dy - dy_hat) / `pr_treat'
+quietly sum dr_t
+local mt = r(mean)
+quietly sum dr_c
+display "DR ATT = " %9.0fc `mt' - r(mean)
+\end{lstlisting}
+
+\textbf{Cross-check with \texttt{drdid}:}
+\begin{lstlisting}[language={[ANSI]C},basicstyle=\ttfamily\footnotesize]
+drdid re $X, time(year) ivar(id) tr(ever_treated) dripw
+\end{lstlisting}
+
+\textbf{Compare to \$1,794.}

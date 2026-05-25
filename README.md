@@ -1,4 +1,4 @@
-<img src="https://github.com/Mixtape-Sessions/Codechella-Madrid/blob/main/img/banner.png?raw=true" alt="Mixtape Sessions Banner" width="100%">
+<img src="https://github.com/Mixtape-Sessions/Codechella-Madrid/blob/main/Slides/codechella_2026.jpg?raw=true" alt="Codechella Madrid 2026" width="100%">
 
 # Codechella Madrid 2026
 
@@ -6,7 +6,7 @@ Welcome to **Codechella Madrid 2026** — Mixtape Sessions' third in-person Span
 
 **When:** May 25–28, 2026 (Monday–Thursday)
 **Where:** CUNEF Auditorium, Madrid
-**Instructor:** Scott Cunningham (Baylor University) + Dan Rees & Mark Anderson (Hidden Curriculum)
+**Instructors:** Scott Cunningham (Baylor University) + Dan Rees & Mark Anderson (Hidden Curriculum)
 
 ---
 
@@ -14,12 +14,13 @@ Welcome to **Codechella Madrid 2026** — Mixtape Sessions' third in-person Span
 
 | Time | Mon May 25 | Tue May 26 | Wed May 27 | Thu May 28 |
 |---|---|---|---|---|
-| **9:00–10:30** | Core DiD | Covariates | Continuous | Staggered |
-| 10:30–11:00 | *Coffee* | *Coffee* | *Coffee* | *Coffee* |
-| **11:00–13:00** | Covariates | Covariates | Continuous | Staggered |
-| 13:00–14:30 | *Lunch (by research field)* | *Lunch* | *Lunch* | *Lunch* |
-| **14:30–15:30** | Dan Rees & Mark Anderson — Hidden Curriculum | Continuous | Staggered | Claude Code |
-| **15:30–17:00** | Dan Rees & Mark Anderson — Hidden Curriculum | Continuous | Dan Rees & Mark Anderson — Hidden Curriculum | Claude Code |
+| 8:30 – 9:00 am | **Registration** | | | |
+| **9:00 – 10:30 am** | Core DiD | Covariates | Continuous | Staggered |
+| 10:30 – 11:00 am | *Coffee* | *Coffee* | *Coffee* | *Coffee* |
+| **11:00 am – 1:00 pm** | Covariates | Covariates | Continuous | Staggered |
+| 1:00 – 2:30 pm | *Lunch (by research field)* | *Lunch* | *Lunch* | *Lunch* |
+| **2:30 – 3:30 pm** | Dan Rees & Mark Anderson — Hidden Curriculum | Continuous | Staggered | Claude Code |
+| **3:30 – 5:00 pm** | Dan Rees & Mark Anderson — Hidden Curriculum | Continuous | Dan Rees & Mark Anderson — Hidden Curriculum | Claude Code |
 
 ---
 
@@ -27,19 +28,15 @@ Welcome to **Codechella Madrid 2026** — Mixtape Sessions' third in-person Span
 
 | File | Topic | Workshop slot |
 |---|---|---|
-| **`01-basics.tex`** | Core DiD: the 2×2, parallel trends, event studies | Day 1, 9:00–10:30 (90 min) |
-| `02-covariates.tex` | DiD with covariates: PSM, IPW, doubly-robust, weighted-PT diagnostics | Day 1 PM + Day 2 mornings (~5 hrs) |
-| `03-continuous.tex` | Continuous-treatment DiD: CBS decomposition, ATT(d\|d), ACRT, `contdid` | Day 2 PM + Day 3 mornings (~6 hrs) |
-| `04-staggered.tex` | Staggered DiD: Goodman-Bacon decomposition, Callaway–Sant'Anna, Sun-Abraham, BJS | Day 3 PM + Day 4 mornings (~4.5 hrs) |
-| `synth.tex` | Synthetic control + synthetic DiD | Reference |
-| `02b-lalonde.tex` | LaLonde re-evaluation: PSM, IPW, doubly-robust on the canonical NSW dataset | Reference |
-| `06-checklist.tex` | Brazil mental-health reform — DiD checklist walkthrough on Dias & Fontes (2024) | Reference |
-| `triple-diff.tex` | DDD (triple-difference) | Reference |
-| `05-claude.tex` | AI agents for empirical research | Day 4 PM (Claude Code session) |
+| **`01-basics.tex`** | Core DiD: the 2×2, parallel trends, event studies | Mon 9:00–10:30 (90 min) |
+| `02-covariates.tex` | DiD with covariates: PSM, IPW, doubly-robust, weighted-PT diagnostics | Mon 11–1, Tue 9–1 (~5.5 hrs) |
+| `02b-lalonde.tex` | LaLonde companion: 5 specs against the DW experimental benchmark on the NSW data | Used alongside Covariates |
+| `03-continuous.tex` | Continuous-treatment DiD: CBS decomposition, ATT(d\|d), ACRT, `contdid` | Tue 2:30–5, Wed 9–1 (~6 hrs) |
+| `04-staggered.tex` | Staggered DiD: Goodman-Bacon decomposition, Callaway–Sant'Anna, Sun-Abraham, BJS | Wed 2:30–3:30, Thu 9–1 (~4.5 hrs) |
+| `05-claude.tex` | AI agents for empirical research | Thu 2:30–5 (Claude Code session) |
+| `06-checklist.tex` | A DiD checklist — Brazil mental-health reform walkthrough (Dias & Fontes 2024) | Reference |
 
-All decks compile with `pdflatex <file>.tex` and use **`remix.sty`** (in the same folder).
-
-> **Note on theming:** `01-basics.tex` uses a custom Madrid palette (terracotta + twilight navy + sunset peach). All other decks render in the default Glasgow green. See `CLAUDE.md` for the override pattern.
+All decks compile with `pdflatex <file>.tex` and use **`remix.sty`** and **`madrid_theme.sty`** (both in the same folder).
 
 The earlier (2025-era) Codechella decks are preserved in `Slides/archived_2025/` for reference.
 
@@ -49,14 +46,14 @@ The earlier (2025-era) Codechella decks are preserved in `Slides/archived_2025/`
 
 | Lab | Companion to | Notes |
 |---|---|---|
-| `basic/` | Day 1 Core DiD | Five equivalent paths to the 2×2 (`equivalence.R`, `.do`, `.py`); event-study by hand |
-| `Lalonde/` | Day 1 PM / Day 2 | LaLonde re-evaluation |
-| `Lalonde-Covariates/` | Day 2 Covariates | PSM / IPW / DR with LaLonde |
-| `China-WTO/` | Day 3 Continuous | Lu & Yu (2015) WTO tariff data — 5 estimators of ATT(d\|d) + event study |
-| `Texas/` | Day 3 (Synth reference) | Texas prison construction — synth + augsynth + synthdid |
+| `basic/` | Mon Core DiD | Five equivalent paths to the 2×2 (`equivalence.R`, `.do`, `.py`); event-study by hand |
+| `Lalonde/` | Mon Core DiD + Tue Covariates | LaLonde re-evaluation |
+| `Lalonde-Covariates/` | Tue Covariates | PSM / IPW / DR with LaLonde |
+| `Castle/` | Mon Core DiD | Cheng & Hoekstra castle doctrine — used in §3 of `01-basics` |
+| `China-WTO/` | Wed Continuous | Lu & Yu (2015) WTO tariff data — 5 estimators of ATT(d\|d) + event study |
+| `Baker/` | Thu Staggered | Staggered DiD bench data |
 | `Brazil/` | Reference | Brazil CAPS mental-health reform |
-| `Castle/` | Reference | Cheng & Hoekstra castle doctrine — used in §3 of 01-basics |
-| `Baker/` | Reference | Staggered DiD bench data |
+| `Texas/` | Reference | Texas prison construction — synth + augsynth + synthdid |
 | `Triple-Diff/` | Reference | DDD simulation |
 | `DDD/`, `Example-Code/`, `Kline-Moretti/`, `Medicaid-Expansion/` | Inherited 2025 labs | Kept as reference |
 
@@ -66,9 +63,9 @@ The earlier (2025-era) Codechella decks are preserved in `Slides/archived_2025/`
 
 - **`baconplus`** — interactive continuous-DiD weight decomposer
   https://scunning1975.github.io/baconplus/
-  Use on Day 3 when introducing the four CBS weight formulas
-- **Bacon decomposition explorer**: https://mixtape.shinyapps.io/Bacon-Decomposition/ (Day 3 PM)
-- **Event-study explorer**: https://mixtape.shinyapps.io/Event-Study/ (Day 1)
+  Use on Wed when introducing the four CBS weight formulas
+- **Bacon decomposition explorer**: https://mixtape.shinyapps.io/Bacon-Decomposition/ (Wed PM)
+- **Event-study explorer**: https://mixtape.shinyapps.io/Event-Study/ (Mon)
 
 ---
 
@@ -77,8 +74,10 @@ The earlier (2025-era) Codechella decks are preserved in `Slides/archived_2025/`
 ```bash
 cd Slides
 pdflatex 01-basics.tex
-# or any other deck
+pdflatex 01-basics.tex   # second pass: Madrid title banner uses tikz remember-picture
 ```
+
+The second pass is required for the Gran Vía banner on the title slide to position correctly (any deck that uses `\codechellatitle` from `madrid_theme.sty`).
 
 All figures referenced by the decks are in `Slides/figures/`. Code that regenerates figures lives in `Slides/scripts/` (R, Python) and `Slides/code/` (data simulations).
 
@@ -86,8 +85,8 @@ All figures referenced by the decks are in `Slides/figures/`. Code that regenera
 
 ## Image credits
 
-Title slide of `01-basics.tex` uses `codechella_2026.jpg` — Gran Vía at sunset, Madrid (Metropolis building visible left of center).
+The top banner and the title slide of every deck use `Slides/codechella_2026.jpg` — Gran Vía at sunset, Madrid (Metropolis building visible left of center).
 
 ---
 
-*For agents / collaborators picking up this repo, see `CLAUDE.md` in the project root for design notes, the source-of-truth relationship with the `the-remix-tour` repo, and the Madrid palette override pattern.*
+*For agents or collaborators picking up this repo, see `CLAUDE.md` in the project root for design notes, the `madrid_theme.sty` palette spec, and the workflow conventions.*

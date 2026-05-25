@@ -5,6 +5,8 @@
 # %%
 library(tidyverse)
 library(fixest)
+# kfbmisc is Kyle Butts' helpers (palette + theme_kyle).
+# Install with: devtools::install_github("kylebutts/kfbmisc")
 library(kfbmisc)
 library(splines)
 
@@ -73,7 +75,7 @@ predict_df <- predict_df |>
     )
   )
 
-linear_pred <- predict(est_spline, newdata = predict_df, se.fit = TRUE)
+linear_pred <- predict(est_linear, newdata = predict_df, se.fit = TRUE)
 predict_df$te_est_linear <- linear_pred$fit
 predict_df$te_est_linear_se <- linear_pred$se.fit
 
@@ -180,7 +182,7 @@ est_spline <- feols(
 pretrends_predict_df <- tibble(dose = seq(0.01, max(collapsed$dose), by = 0.01))
 
 linear_pred <- predict(
-  est_spline,
+  est_linear,
   newdata = pretrends_predict_df,
   se.fit = TRUE
 )
@@ -235,7 +237,7 @@ pretrends_predict_df$te_est_spline_se <- spline_pred$se.fit
 # Event-study ----
 
 es_ests <- tibble()
-for (curr_year in c(1998, 1999, 2000, 2002, 2003, 2005, 2005)) {
+for (curr_year in c(1998, 1999, 2000, 2002, 2003, 2004, 2005)) {
   # 2x2
   collapsed <- df |>
     filter(

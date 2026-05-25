@@ -1,0 +1,237 @@
+%% remix.sty — The Remix beamer style
+%% For Scott Cunningham's "Causal Inference: The Remix" workshops
+%% Yale University Press, forthcoming 2026
+%%
+%% Built on the Gov 2001 palette with the bright Remix green accent
+%% sampled directly from the book cover.
+%%
+%% Usage:
+%%   \documentclass{beamer}
+%%   \usepackage{remix}
+%%   \begin{document}
+%%     \remixtitleframe{Title}{Subtitle}{Scott Cunningham}{Venue, Dates}
+%%     ...
+%%   \end{document}
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{remix}[2026/05/10 The Remix beamer style v1.0]
+
+%% ---------- Required packages ----------
+\RequirePackage{xcolor}
+\RequirePackage{tikz}
+\RequirePackage[T1]{fontenc}
+\RequirePackage{lmodern}
+\RequirePackage[scaled=0.92]{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+\RequirePackage{microtype}
+\RequirePackage{graphicx}
+\RequirePackage{etoolbox}
+
+%% ---------- Palette ----------
+%% Sampled from green_remix_cover.png: #40A848 (bright grass green)
+\definecolor{remixgreen}{HTML}{40A848}      % Primary accent — bright cover green
+\definecolor{remixgreendark}{HTML}{1F5C25}  % Section header band, deeper for contrast
+\definecolor{remixgreenlight}{HTML}{D9F0DB} % Subtle tints, alertblock background
+\definecolor{slate}{HTML}{4A5568}           % Body text
+\definecolor{charcoal}{HTML}{2D3748}        % Frame titles, emphasis
+\definecolor{forest}{HTML}{276749}          % Positive/success secondary
+\definecolor{ocean}{HTML}{2B6CB0}           % Links, secondary emphasis
+\definecolor{warmgray}{HTML}{718096}        % Captions, page numbers
+\definecolor{lightbg}{HTML}{F7FAFC}         % Subtle backgrounds
+\definecolor{cream}{HTML}{FAF8F2}           % Title-slide warmth
+\definecolor{oceanlight}{HTML}{DCE9F5}      % Example block background
+
+%% Modular accent — other stops can redefine before \begin{document}
+\providecolor{accent}{HTML}{40A848}
+\providecolor{accentdark}{HTML}{1F5C25}
+
+%% ---------- Beamer theme bones ----------
+\usetheme{default}
+\usefonttheme{professionalfonts}
+\setbeamertemplate{navigation symbols}{}
+\setbeamercolor{normal text}{fg=slate,bg=white}
+\setbeamercolor{structure}{fg=accent}
+\setbeamercolor{alerted text}{fg=accent}
+\setbeamercolor{frametitle}{fg=charcoal,bg=white}
+\setbeamercolor{title}{fg=charcoal}
+\setbeamercolor{subtitle}{fg=warmgray}
+\setbeamercolor{author}{fg=warmgray}
+\setbeamercolor{date}{fg=warmgray}
+\setbeamercolor{institute}{fg=warmgray}
+
+%% ---------- Frame title ----------
+\setbeamerfont{frametitle}{series=\bfseries,size=\large}
+\setbeamertemplate{frametitle}{%
+  \vspace*{0.4em}%
+  \leftskip=1em\rightskip=1em%
+  \insertframetitle\par
+  \ifx\insertframesubtitle\@empty\else
+    {\color{warmgray}\itshape\small\insertframesubtitle\par}%
+  \fi
+  \vspace*{0.2em}%
+}
+
+%% ---------- Itemize / enumerate ----------
+\setbeamertemplate{itemize item}{\color{accent}\rule[0.3ex]{0.55ex}{0.55ex}}
+\setbeamertemplate{itemize subitem}{\color{accent}\textendash}
+\setbeamertemplate{itemize subsubitem}{\color{warmgray}\textperiodcentered}
+\setbeamertemplate{enumerate item}{\color{accent}\insertenumlabel.}
+\setbeamercolor{itemize item}{fg=accent}
+\setbeamercolor{itemize subitem}{fg=accent}
+\setbeamercolor{enumerate item}{fg=accent}
+\setbeamercolor{enumerate subitem}{fg=accent}
+
+%% Tighten item spacing
+\setbeamertemplate{itemize/enumerate body begin}{\small}
+\setlength{\leftmargini}{1.4em}
+\setlength{\leftmarginii}{1.2em}
+
+%% ---------- Blocks ----------
+\setbeamertemplate{block begin}{%
+  \par\vskip\medskipamount%
+  \begin{beamercolorbox}[colsep*=.75ex,sep=0.5em,rounded=false]{block title}%
+    \usebeamerfont*{block title}\bfseries\insertblocktitle%
+  \end{beamercolorbox}%
+  \nointerlineskip%
+  \begin{beamercolorbox}[colsep*=.75ex,sep=0.5em,vmode]{block body}%
+}
+\setbeamertemplate{block end}{\end{beamercolorbox}\vskip\smallskipamount}
+\setbeamercolor{block title}{fg=charcoal,bg=lightbg}
+\setbeamercolor{block body}{fg=slate,bg=lightbg}
+\setbeamercolor{block title alerted}{fg=charcoal,bg=remixgreenlight}
+\setbeamercolor{block body alerted}{fg=slate,bg=remixgreenlight}
+\setbeamercolor{block title example}{fg=charcoal,bg=oceanlight}
+\setbeamercolor{block body example}{fg=slate,bg=oceanlight}
+
+%% ---------- Footline ----------
+\setbeamertemplate{footline}{%
+  \leavevmode%
+  {\color{accent}\hrule height 0.4pt}%
+  \vskip1.6ex%
+  \hbox to \paperwidth{%
+    \hspace*{1em}{\color{warmgray}\small\remixfooter}%
+    \hfill%
+    {\color{warmgray}\small\insertframenumber}\hspace*{1em}%
+  }%
+  \vskip1.4ex%
+}
+
+%% Footer text — override per deck:
+%%   \renewcommand{\remixfooter}{The Remix \textperiodcentered\ Glasgow \textperiodcentered\ May 2026}
+\providecommand{\remixfooter}{The Remix\,\textperiodcentered\,Glasgow\,\textperiodcentered\,May 2026}
+
+%% Section-divider top-right venue text — override per deck via
+%%   \renewcommand{\remixsectionvenue}{Codechella Madrid \textperiodcentered\ May 2026}
+\providecommand{\remixsectionvenue}{Glasgow \textperiodcentered\ May 2026}
+
+%% ---------- Hyperref ----------
+%% beamer loads hyperref itself; we only customize colors.
+\AtBeginDocument{\hypersetup{colorlinks=true,linkcolor=ocean,urlcolor=ocean,citecolor=ocean}}
+
+%% ---------- Title frame ----------
+%% \remixtitleframe{Title}{Subtitle}{Author}{Venue + Dates}
+%%
+%% Layout uses two clean zones:
+%%   Left: cover image, full-height with margin top and bottom
+%%   Right: title block (eyebrow + rule + title + subtitle + author + venue + tagline)
+%% Nothing floats at the bottom — the cover owns its zone completely.
+\newcommand{\remixtitleframe}[4]{%
+  \begingroup
+  \setbeamertemplate{footline}{}
+  \begin{frame}[plain]
+    \begin{tikzpicture}[remember picture,overlay]
+      %% Cream background
+      \fill[cream] (current page.south west) rectangle (current page.north east);
+      %% Left zone: cover image, anchored from top-left with 1cm top + bottom margin
+      \node[anchor=north west,inner sep=0pt] at ([xshift=0.8cm,yshift=-1cm]current page.north west) {%
+        \includegraphics[height=0.82\paperheight]{green_remix_cover.png}%
+      };
+      %% Right zone: title block, vertically centered
+      \node[anchor=west,text width=0.52\paperwidth,align=left] at ([xshift=0.43\paperwidth]current page.west) {%
+        {\color{accent}\fontsize{10pt}{12pt}\selectfont\bfseries\MakeUppercase{The Remix}\par}%
+        \vspace{0.4em}
+        {\color{accent}\rule{3em}{0.8pt}\par}%
+        \vspace{1.1em}
+        {\color{charcoal}\bfseries\fontsize{24pt}{28pt}\selectfont #1\par}%
+        \vspace{0.6em}
+        {\color{warmgray}\itshape\fontsize{13pt}{16pt}\selectfont #2\par}%
+        \vspace{2em}
+        {\color{charcoal}\fontsize{11pt}{14pt}\selectfont #3\par}%
+        \vspace{0.3em}
+        {\color{warmgray}\fontsize{10pt}{13pt}\selectfont #4\par}%
+        \vspace{2.4em}
+        {\color{warmgray}\fontsize{8pt}{10pt}\selectfont \textit{Causal Inference: The Remix}\,\textperiodcentered\,Yale University Press\,\textperiodcentered\,forthcoming 2026\par}%
+      };
+    \end{tikzpicture}
+  \end{frame}
+  \endgroup
+}
+
+%% ---------- Section break frame ----------
+%% \remixsection{Section Title}
+\newcommand{\remixsection}[1]{%
+  \begingroup
+  \setbeamertemplate{footline}{}
+  \begin{frame}[plain]
+    \begin{tikzpicture}[remember picture,overlay]
+      \fill[cream] (current page.south west) rectangle (current page.north east);
+      %% Top band in accentdark
+      \fill[accentdark] (current page.north west) rectangle ([yshift=-1.6cm]current page.north east);
+      %% Section label "PART" on the band
+      \node[anchor=west,text=cream] at ([xshift=1em,yshift=-0.8cm]current page.north west) {%
+        \fontsize{10pt}{12pt}\selectfont\bfseries\textsc{The Remix}%
+      };
+      \node[anchor=east,text=cream] at ([xshift=-1em,yshift=-0.8cm]current page.north east) {%
+        \fontsize{10pt}{12pt}\selectfont \textit{\remixsectionvenue}%
+      };
+      %% Section title, centered, charcoal
+      \node[anchor=center,text width=0.85\paperwidth,align=center] at (current page.center) {%
+        {\color{accent}\fontsize{12pt}{14pt}\selectfont \bfseries\textsc{Lesson}}\\[0.4em]
+        {\color{charcoal}\bfseries\fontsize{32pt}{38pt}\selectfont #1\par}%
+      };
+      %% Bottom accent rule
+      \draw[accent,line width=0.8pt] ([yshift=2cm,xshift=0.25\paperwidth]current page.south west) -- ([yshift=2cm,xshift=-0.25\paperwidth]current page.south east);
+    \end{tikzpicture}
+  \end{frame}
+  \endgroup
+}
+
+%% ---------- Convenience macros ----------
+\newcommand{\highlight}[1]{\textcolor{accent}{\textbf{#1}}}
+\newcommand{\muted}[1]{\textcolor{warmgray}{#1}}
+\newcommand{\meta}[1]{{\color{warmgray}\small\itshape #1}}
+
+%% Pull quote — \pullquote{Text}{Attribution}.  Empty attribution suppresses the dash line.
+\newcommand{\pullquote}[2]{%
+  \begin{flushleft}
+    {\color{accent}\rule{0.4em}{2.5em}}\hspace{0.6em}%
+    \begin{minipage}[c]{0.85\textwidth}
+      {\color{charcoal}\itshape\large #1}%
+      \ifx\relax#2\relax\else\\[0.3em]{\color{warmgray}\small --- #2}\fi
+    \end{minipage}
+  \end{flushleft}
+}
+
+%% Full-bleed image frame
+\newcommand{\titleimage}[1]{%
+  \begin{frame}[plain]
+    \begin{tikzpicture}[remember picture,overlay]
+      \node[anchor=center,inner sep=0pt] at (current page.center) {%
+        \includegraphics[width=\paperwidth,height=\paperheight,keepaspectratio]{#1}%
+      };
+    \end{tikzpicture}
+  \end{frame}
+}
+
+%% Two-column body — \twocol{left}{right}
+\newcommand{\twocol}[2]{%
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.48\textwidth}#1\end{column}
+    \begin{column}{0.48\textwidth}#2\end{column}
+  \end{columns}
+}
+
+%% Tighten paragraph skip
+\AtBeginDocument{\setlength{\parskip}{0.3em}}
+
+\endinput

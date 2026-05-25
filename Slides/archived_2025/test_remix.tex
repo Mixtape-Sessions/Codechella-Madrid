@@ -1,0 +1,80 @@
+\documentclass[aspectratio=169,11pt]{beamer}
+\usepackage{remix}
+
+\begin{document}
+
+%% ---------- TITLE ----------
+\remixtitleframe
+  {Advanced Topics in Applied Causal Inference}
+  {A test of the Remix style}
+  {Scott Cunningham, Baylor University}
+  {University of Glasgow \textperiodcentered\ May 18--22, 2026}
+
+%% ---------- SECTION BREAK ----------
+\remixsection{1. DiD Origins}
+
+%% ---------- CONTENT FRAME ----------
+\begin{frame}{The four averages and three subtractions}{Ashenfelter's move at Princeton}
+\begin{itemize}
+  \item DiD is not a regression. It's an \highlight{idea}.
+  \item Orley Ashenfelter at the Industrial Relations Section: applied research questions, communicate to bureaucrats, get the answer right with high-quality data.
+  \item His move: don't emphasize the regression --- emphasize the simplicity of \highlight{four averages and three subtractions}.
+  \item The 2$\times$2 table: treated/control by pre/post; four cells; four averages.
+\end{itemize}
+
+\vspace{0.5em}
+
+\begin{block}{The DiD formula}
+\[
+\widehat{\text{DiD}} = \underbrace{(Y_{11} - Y_{10})}_{\text{treated change}} - \underbrace{(Y_{01} - Y_{00})}_{\text{control change}}
+\]
+\end{block}
+\end{frame}
+
+%% ---------- BLOCK SHOWCASE ----------
+\begin{frame}{Block styles}{Three flavors for three uses}
+\begin{block}{Standard block}
+Body text uses slate. Title is charcoal on a light background. For neutral commentary or definitions.
+\end{block}
+
+\begin{alertblock}{Alert block}
+For \highlight{key insights} or warnings. The accent color tints the background subtly. Use sparingly --- restraint matters.
+\end{alertblock}
+
+\begin{exampleblock}{Example block}
+For worked examples or empirical illustrations. Ocean-blue tint distinguishes it from the alert.
+\end{exampleblock}
+\end{frame}
+
+%% ---------- PULL QUOTE ----------
+\begin{frame}{Voice of the field}
+\pullquote{If you can convince a bureaucrat in five minutes, you have done something. Anything else is academic.}{Orley Ashenfelter (paraphrased, Scott's creative license)}
+
+\vspace{1em}
+The point is communication. The 2$\times$2 doesn't need a regression to tell its story.
+\end{frame}
+
+%% ---------- SECTION BREAK 2 ----------
+\remixsection{2. The Three Regressions}
+
+%% ---------- TWO-COLUMN ----------
+\begin{frame}{Equivalence on castle.dta}{2005--2006 subset, one DiD, three ways}
+\twocol{%
+\textbf{Three specifications:}
+\begin{enumerate}
+  \item OLS with interactions \\ \texttt{reg l\_homicide post\#\#treat}
+  \item TWFE \\ \texttt{xtreg ..., fe vce(cluster sid)}
+  \item Long difference \\ \texttt{reshape wide; reg diff treat}
+\end{enumerate}
+}{%
+\textbf{All three return the same number} to machine epsilon.
+
+\vspace{0.5em}
+This equivalence is what \highlight{made it possible} to extend DiD to covariates, staggered, and continuous treatment using OLS infrastructure.
+
+\vspace{0.5em}
+\meta{But the equivalence breaks once you add complexity. Day 2.}
+}
+\end{frame}
+
+\end{document}

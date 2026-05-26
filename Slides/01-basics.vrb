@@ -3,7 +3,7 @@
 \footnotesize Castle doctrine cohort treated in 2006. Use 2005 as the omitted reference. The 2004 coefficient is one event-study 2$\times$2.
 \vspace{0.3em}
 \begin{columns}[T,onlytextwidth]
-\column{0.50\textwidth}
+\column{0.46\textwidth}
 \textbf{By hand}
 \begin{lstlisting}[basicstyle=\ttfamily\tiny]
 su l_homicide if treat==1 & year==2004
@@ -15,26 +15,27 @@ su l_homicide if treat==0 & year==2004
 su l_homicide if treat==0 & year==2005
 * mean = 1.282884
 
-di (1.802504 - 1.775398) ///
- - (1.254353 - 1.282884)
+di (1.802504-1.775398) - (1.254353-1.282884)
+* 0.05564
 \end{lstlisting}
 \begin{center}
-\footnotesize $\hat\beta_{2004} =$ \highlight{$\mathbf{0.0556}$}
+\footnotesize $\hat\beta_{2004} =$ \highlight{$\mathbf{0.05564}$}
 \end{center}
-\column{0.50\textwidth}
+\column{0.04\textwidth}\hfill
+\column{0.46\textwidth}
 \textbf{Via OLS in Stata}
 \begin{lstlisting}[basicstyle=\ttfamily\tiny]
 reg l_homicide ///
    treat##ib2005.year, ///
    cluster(state)
 
-* Coefficient on
-*   1.treat#2004.year:
+di _b[1.treat#2004.year]
+* 0.05564
 \end{lstlisting}
 \begin{center}
 \footnotesize $\hat\beta_{2004} =$ \highlight{$\mathbf{0.05564}$}
 \end{center}
-\meta{Cluster-robust SE: 0.060. \;Match to 4 decimals.}
+\meta{Cluster-robust SE: 0.060. \;Match to 5 decimals.}
 \end{columns}
 \vspace{0.3em}
 \begin{center}

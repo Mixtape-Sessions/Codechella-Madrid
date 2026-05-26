@@ -57,21 +57,51 @@
   {Scott Cunningham \textperiodcentered\ Baylor University}
   {CUNEF Auditorium \textperiodcentered\ May 25--28, 2026}
 
-%% ---------- Slide 2: Where we are ----------
-\begin{frame}{The PT-violation problem, take two}
+%% ---------- Slide 2: Your DiD lives or dies by PT ----------
+\begin{frame}{Your DiD lives or dies by parallel trends}
 \vspace{0.5em}
+With \textbf{no anticipation} and a \textbf{clean (untreated) comparison group}, the 2$\times$2 is always and only:
+\vspace{0.3em}
+\begin{center}
+\Large
+$\widehat{\text{2}\times\text{2}} \;=\; \text{ATT} \;+\; \text{non-PT bias}$
+\end{center}
+\vspace{0.4em}
 \begin{itemize}
-  \item This morning: a \highlight{third group} that shares the differential trend.
-  \item But often, you don't have a clean placebo group.
-  \item This afternoon: \highlight{condition on covariates that absorb the differential trend.}
+  \item PT is the \highlight{only} condition you need for unbiasedness.
+  \item The 2$\times$2 \textit{is whatever it is}. No estimation trick saves it. If PT holds, the number you computed yesterday \textit{is} the ATT.
+  \item So your paper's evidence is mostly about \highlight{defending PT} --- not about estimation.
 \end{itemize}
-\vspace{0.6em}
-\begin{block}{Today's three estimators, and one false friend}
-\small
-\textbf{OR} (outcome regression) \;\; \textbf{IPW} (inverse propensity weighting) \;\; \textbf{DR} (doubly robust) \\[0.3em]
-And: ``\textit{can't I just control for the propensity score in a regression?}'' \\
-\highlight{That's the false friend.} We'll see why before DR.
-\end{block}
+\end{frame}
+
+%% ---------- Slide 3: What if PT fails? ----------
+\begin{frame}{What if PT fails?}
+\vspace{0.5em}
+Then to keep using DiD, you have to \textit{recover} it. Two options:
+\vspace{0.5em}
+\begin{enumerate}\setlength\itemsep{0.5em}
+  \item \highlight{Triple differences.} A second between-group difference absorbs the differential trend. \\
+        \textit{Harder design. Recent audits suggest most papers are doing it incorrectly.}
+  \item \highlight{Covariates.} Condition on $X$ so that PT holds \textit{within strata of $X$}, even if it fails unconditionally.
+\end{enumerate}
+\vspace{0.7em}
+\meta{Today: option 2. \;Covariates in DiD serve a non-intuitive purpose --- they're not for ``controlling.'' \;They're for fixing broken parallel trends.}
+\end{frame}
+
+%% ---------- Slide 4: Covariates as the fix ----------
+\begin{frame}{Covariates as the fix for broken PT}
+\vspace{0.5em}
+We'll cover a variety of estimators that incorporate covariates into the DiD estimation:
+\vspace{0.4em}
+\begin{itemize}\setlength\itemsep{0.4em}
+  \item \highlight{OR} --- outcome regression (Heckman, Ichimura \& Todd 1997)
+  \item \highlight{IPW} --- inverse propensity weighting (Abadie 2005)
+  \item \highlight{DR-DiD} --- doubly robust (Sant'Anna \& Zhao 2020)
+\end{itemize}
+\vspace{0.5em}
+We'll contrast each with the workhorse: \highlight{OLS TWFE with controls}.
+\vspace{0.3em}
+\meta{Spoiler: TWFE-with-controls is the false friend. It looks like it should work. It doesn't.}
 \end{frame}
 
 %% ---------- Slide 3: The applied problem ----------
@@ -146,12 +176,6 @@ $\mathbb{E}[\Delta Y(0) \mid D{=}1, X] \;=\; \mathbb{E}[\Delta Y(0) \mid D{=}0, 
 \vspace{0.4em}
 \textbf{The irony.} What HIT wrote down was the \highlight{\textit{conditional}} PT assumption ---
 $\mathbb{E}[\Delta Y(0) \mid D{=}1, X] = \mathbb{E}[\Delta Y(0) \mid D{=}0, X]$.
-
-\vspace{0.5em}
-\textbf{Unconditional PT came later.} \;The morning's version --- $\mathbb{E}[\Delta Y(0) \mid D{=}1] = \mathbb{E}[\Delta Y(0) \mid D{=}0]$ --- is the special case of HIT's assumption with no $X$.
-
-\vspace{0.5em}
-\meta{The first PTA written down was the conditional one. \;The unconditional one is what the textbook taught next.}
 \end{frame}
 
 %% ---------- L2-F2: TWFE with controls ----------
@@ -165,232 +189,29 @@ Y_{it} \;=\; \alpha_i \;+\; \gamma_t \;+\; \delta\, (D_i {\times} \text{post}_t)
 \textbf{``Sure! If you're willing to impose three more assumptions.''}
 \end{center}
 
-\vspace{0.8em}
+\vspace{0.6em}
 \begin{center}
 \footnotesize
-$\underbrace{\;\;\delta \text{ doesn't depend on } X\;\;}_{\textstyle\color{accent}\downarrow\;\;\textbf{Bias}_{\text{HTE}}}
+$\underbrace{\;\;\delta \text{ doesn't depend on } X\;\;}_{\textstyle\color{accent}\textbf{Bias}_{\text{HTE}}}
 \;\;\;
-\underbrace{\;\;X \text{ has parallel trends across groups}\;\;}_{\textstyle\color{accent}\downarrow\;\;\textbf{Bias}_{\Delta X}}
+\underbrace{\;\;X \text{ has parallel trends across groups}\;\;}_{\textstyle\color{accent}\textbf{Bias}_{\Delta X}}
 \;\;\;
-\underbrace{\;\;X \text{ is time-invariant}\;\;}_{\textstyle\color{accent}\downarrow\;\;\textbf{Bias}_{\text{FE}}}$
+\underbrace{\;\;X \text{ is time-invariant}\;\;}_{\textstyle\color{accent}\textbf{Bias}_{\text{FE}}}$
 \end{center}
 
-\vspace{0.6em}
+\vspace{0.4em}
 \begin{itemize}\setlength\itemsep{1pt}\footnotesize
-  \item $\textbf{Bias}_{\textbf{HTE}}$. \;If $\delta(X)$ varies with $X$, TWFE fits one $\delta$. \;\textit{Y(1) problem.}
-  \item $\textbf{Bias}_{\boldsymbol{\Delta X}}$. \;If $X$ is imbalanced and drives $Y(0)$'s trend, PTA fails. \;\textit{Y(0) problem.}
-  \item $\textbf{Bias}_{\textbf{FE}}$. \;You needed $X$ to defend \textit{conditional} PT --- but $\alpha_i$ demeans time-invariant $X$ to zero, silently restoring \textit{unconditional} PT. \;Fix: $\text{Post}\times X_{i,0}$ (pre-period $X$; \textit{next slide}).
+  \item $\textbf{Bias}_{\textbf{HTE}}$. \;If $\delta(X)$ varies with $X$, TWFE fits one $\delta$. \;\textit{Y(1) problem. \;Sign indeterminate.}
+  \item $\textbf{Bias}_{\boldsymbol{\Delta X}}$. \;If $X$ is imbalanced and drives $Y(0)$'s trend, PTA fails. \;\textit{Y(0) problem. \;Sign indeterminate.}
+  \item $\textbf{Bias}_{\textbf{FE}}$. \;$\alpha_i$ demeans time-invariant $X$ to zero, silently restoring \textit{unconditional} PT. \;Fix: $\text{Post}\times X_{i,0}$. \;\textit{Sign indeterminate.}
 \end{itemize}
 \end{frame}
 
-%% ---------- L2-F0z: Why we need X(1) = X(0) — derivation showing the residual ----------
-\begin{frame}{Why we need $X(1) = X(0)$: the cross-term decomposition}
-\scriptsize
-\textbf{TWFE cell means} (CPT + no anticipation), with $X_{Dt}\equiv E[X\mid D, t]$:
-\[
-\begin{array}{rl@{\qquad}rl}
-E[Y_1\mid D{=}1] &= \alpha_1 + \alpha_2 + \alpha_3 + \delta + \beta X_{11} &
-E[Y_0\mid D{=}1] &= \alpha_1 + \alpha_3 + \beta X_{10} \\[2pt]
-E[Y_1\mid D{=}0] &= \alpha_1 + \alpha_2 + \beta X_{01} &
-E[Y_0\mid D{=}0] &= \alpha_1 + \beta X_{00}
-\end{array}
-\]
+%% ===========================================================
+%%   Bias_HTE — derived via Scott's framework: TWFE makes Y(0) and Y(1) share
+%%   the same slope on X; if true slopes differ, ATT = delta + (theta_1 - theta_2) X.
+%% ===========================================================
 
-\textbf{Take the DiD.} \;The $\alpha$'s cancel; what's left is:
-\[
-\delta^{DD} \;=\; \delta \;+\; \beta\,\big[\,(X_{11} - X_{10}) \;-\; (X_{01} - X_{00})\,\big]
-\]
-
-\textbf{Switching equation for $X$:} \;controls are never treated, so $X_{00} = X_{01}$ (diff $=0$); for treated, $X_{10} = E[X(0)|D{=}1]$ and $X_{11} = E[X(1)|D{=}1]$. \;Substitute:
-\[
-\delta^{DD} \;=\; \delta \;+\; \beta\,\underbrace{E\big[X(1) - X(0)\mid D{=}1\big]}_{\text{treatment effect of }D\text{ on }X}
-\]
-
-\textbf{The cross-term cancels iff $X(1) = X(0)$.} \;Otherwise the residual is $\beta$ times the \highlight{treatment effect on $X$} (Angrist--Pischke bad control).
-
-\textbf{Two fixes:} \;assume $X_i(1) = X_i(0) = X_i$ (demographics); or use $X_{i,0}$ everywhere (pre-period $X$ is mechanically $X(0)$ by no-anticipation).
-\end{frame}
-
-%% =========================================================================
-%%   Bias_HTE — heterogeneous treatment effects in X. About Y(1).
-%% =========================================================================
-
-%% ---------- L2-HTE-1: Bias_HTE — intuition and PO ----------
-\begin{frame}{$\text{Bias}_{\text{HTE}}$: when treatment effects depend on $X$}
-\footnotesize
-\textbf{In plain English.} \;Treatment doesn't work the same for everyone. \;Younger workers gain more from training than older ones; men gain more than women. \;That heterogeneity lives in $Y(1)$.
-
-\vspace{0.5em}
-\textbf{In potential outcomes:}
-\[
-\delta(X) \;\equiv\; \mathbb{E}[Y(1) - Y(0) \mid X,\,D{=}1] \;\;\text{is a \textit{function} of } X.
-\]
-The true ATT averages $\delta(X)$ over the treated $X$-distribution:
-\[
-\text{ATT} \;=\; \mathbb{E}\big[\delta(X) \mid D{=}1\big].
-\]
-
-\textbf{What TWFE-additive-$X$ fits:} \;one scalar $\hat{\delta}$. \;A weighted average of $\delta(X)$ whose weights are determined by OLS mechanics, \textit{not} the treated $X$-distribution.
-
-\vspace{0.4em}
-\highlight{Note: PTA on $Y(0)$ can hold perfectly --- $\text{Bias}_{\text{HTE}}$ is a $Y(1)$ problem, not a $Y(0)$ problem.}
-\end{frame}
-
-%% ---------- L2-HTE-2: Bias_HTE — Stata, building Y(0) and Y(1) by hand ----------
-\begin{frame}[fragile]{$\text{Bias}_{\text{HTE}}$ in Stata}
-\footnotesize
-\begin{lstlisting}[language={[ANSI]C},basicstyle=\ttfamily\scriptsize]
-* Y(0): same for everyone of a given age
-gen y0 = 1000 + 5*age + rnormal(0, 10)
-
-* Y(1) = Y(0) + delta(X). Treatment effect grows with age.
-gen y1 = y0 + 200 + 50*age           // delta(age) = 200 + 50*age
-gen delta = y1 - y0                  // varies by age
-
-* True ATT (over treated X-distribution)
-summarize delta if treat == 1
-\end{lstlisting}
-
-\vspace{0.4em}
-\begin{itemize}\setlength\itemsep{2pt}
-  \item Look at $\delta$: \;\;$\delta_i = 200 + 50\,\text{age}_i$. \;Not a constant.
-  \item TWFE-additive-$X$ on the panel returns one $\hat{\delta}$. \;That number is a weighted average of $\delta$ that doesn't match $\mathbb{E}[\delta \mid D=1]$.
-\end{itemize}
-\end{frame}
-
-%% =========================================================================
-%%   Bias_DeltaX — Y(0) trend depends on X with X imbalance. About Y(0).
-%% =========================================================================
-
-%% ---------- L2-DX-1: Bias_DeltaX — lead with the RCT intuition ----------
-\begin{frame}{$\text{Bias}_{\Delta X}$: imbalance in $X$ that drives $Y(0)$}
-\footnotesize
-\textbf{The RCT analogy.} \;Earnings $Y$ depends on a million $X$s (gender, age, education, neighborhood, ...). \;Randomization \textit{balances} those $X$s across treatment and control, so the $X \to Y$ channels cancel.
-
-\vspace{0.5em}
-\textbf{DiD without randomization.} \;If treated and control look different on $X$, and those $X$s drive $Y(0)$'s trend, then the group-level $Y(0)$ trends differ --- and PTA on $Y(0)$ fails.
-
-\vspace{0.5em}
-\textbf{A simple example.} \;Earnings change: \;men $+\$2$, women $+\$1$. \;Same for everyone (no treatment effect).
-\begin{itemize}\setlength\itemsep{2pt}
-  \item Treated 75\% male, control 25\% male:
-  \item $\;\;\mathbb{E}[\Delta Y(0) \mid D{=}1] = 0.75(2) + 0.25(1) = 1.75$
-  \item $\;\;\mathbb{E}[\Delta Y(0) \mid D{=}0] = 0.25(2) + 0.75(1) = 1.25$
-  \item Naive DiD: \;\highlight{$+0.50$ --- pure imbalance bias.}
-\end{itemize}
-\end{frame}
-
-%% ---------- L2-DX-2: Bias_DeltaX — the PO formalization ----------
-\begin{frame}{$\text{Bias}_{\Delta X}$: the formal statement}
-\footnotesize
-\textbf{PTA on $Y(0)$:}
-\[
-\mathbb{E}[\Delta Y(0) \mid D{=}1] \;=\; \mathbb{E}[\Delta Y(0) \mid D{=}0].
-\]
-
-\vspace{0.3em}
-\textbf{Under TWFE-additive-$X$} $\big(Y(0)_{it} = \alpha_i + \gamma_t + \beta X_{it} + \varepsilon\big)$:
-\[
-\beta \cdot \big(\mathbb{E}[\Delta X \mid D{=}1] - \mathbb{E}[\Delta X \mid D{=}0]\big) \;=\; 0.
-\]
-
-\vspace{0.3em}
-For this to hold: \;either $\beta = 0$ ($X$ doesn't matter for $Y(0)$), or $\Delta X^T = \Delta X^C$ \;($X$ trends are \textit{parallel} across groups).
-
-\vspace{0.5em}
-\highlight{The imbalance is the engine.} \;If $X$ matters for $Y(0)$ and $X$ is distributed differently across groups, PTA fails. \;Whether $\beta$ is constant or changes over time is second-order --- the cross-group $X$-gap is what bites.
-\end{frame}
-
-%% ---------- L2-DX-3: Bias_DeltaX — Stata, gender example ----------
-\begin{frame}[fragile]{$\text{Bias}_{\Delta X}$ in Stata}
-\footnotesize
-\begin{lstlisting}[language={[ANSI]C},basicstyle=\ttfamily\scriptsize]
-* Gender is time-invariant. Treatment composition: 75% male treated,
-* 25% male control. Y(0) trend depends on gender.
-*   delta Y(0) = +2 for men, +1 for women   (no treatment effect)
-
-gen y0_pre  = 1000 + 100*male + rnormal(0, 5)
-gen y0_post = y0_pre + 2*male + 1*(1 - male)
-
-* What naive DiD picks up on the non-experimental sample
-mean y0_post if treat == 1                 // 1.75 in expectation
-mean y0_post if treat == 0                 // 1.25 in expectation
-\end{lstlisting}
-
-\vspace{0.4em}
-\begin{itemize}\setlength\itemsep{2pt}
-  \item Look at $\Delta Y(0)$: \;different for men and women, but no treatment effect anywhere.
-  \item Cross-group DiD: $1.75 - 1.25 = 0.50$. \;Pure imbalance.
-\end{itemize}
-\end{frame}
-
-%% ---------- L2-DX-4: Balance tables — heuristic check, NOT identification ----------
-\begin{frame}{Heuristic check: balance tables on $X$}
-\footnotesize
-You can't test PTA on $Y(0)$ directly --- it's counterfactual.
-
-\vspace{0.4em}
-\textbf{What you CAN check:} \;is $X$ balanced across treated and control?
-\begin{itemize}\setlength\itemsep{2pt}
-  \item \textbf{Levels} ($\mathbb{E}[X \mid D{=}1] = \mathbb{E}[X \mid D{=}0]$?) --- matters when $X$'s effect varies over time.
-  \item \textbf{Trends} ($\mathbb{E}[\Delta X \mid D{=}1] = \mathbb{E}[\Delta X \mid D{=}0]$?) --- matters under constant $\beta$.
-\end{itemize}
-
-\vspace{0.5em}
-\textbf{Baker et al.\ (2025, \textit{Journal of Economic Literature}) Table 2} reports both: a panel of pre-period $X$ levels and a panel of $X$ differences across years. \;Both panels matter because both are channels through which imbalance creates $\text{Bias}_{\Delta X}$.
-
-\vspace{0.5em}
-\highlight{Identification vs.\ heuristic.} \;PTA on $Y(0)$ is the identifying assumption. \;Balance on $X$ is a heuristic check. \;Same epistemic status as the pre-period parallel-trends test: it's evidence, not proof.
-\end{frame}
-
-%% =========================================================================
-%%   Bias_FE — time-invariant X eaten by the FE transformation.
-%% =========================================================================
-
-%% ---------- L2-FE-1: Bias_FE — intuition ----------
-\begin{frame}{$\text{Bias}_{\text{FE}}$: the FE transformation eats time-invariant $X$}
-\footnotesize
-\textbf{Within-unit demeaning:} \;$\tilde{X}_{it} = X_{it} - \bar{X}_i$. \;If $X$ is time-invariant within unit (race, education at baseline, pre-program earnings), then $\tilde{X}_{it} = 0$ in every period.
-
-\vspace{0.5em}
-\[
-\text{TWFE-additive-}X \;\;\text{ estimates as if those covariates were} \;\; 0.
-\]
-What you wrote as a control isn't what the regression conditioned on.
-
-\vspace{0.5em}
-\textbf{The fix:} \;enter $X$ as $\text{Post} \times X$. \;Post varies within unit, so the FE cannot eat the interaction.
-
-\vspace{0.5em}
-\highlight{In plain English.} \;You wrote \texttt{race} on the right-hand side and thought you controlled for it. \;After within-unit demeaning, the regression saw $\tilde{\texttt{race}} = 0$ for every observation. \;Additive-$X$ delivers the same point estimate as no covariates at all.
-\end{frame}
-
-%% ---------- L2-FE-2: Bias_FE in Stata ----------
-\begin{frame}[fragile]{$\text{Bias}_{\text{FE}}$ in Stata}
-\footnotesize
-\begin{lstlisting}[language={[ANSI]C},basicstyle=\ttfamily\scriptsize]
-* Z is time-invariant: race, sex, education at baseline.
-* Z's effect on Y appears only in the post period.
-
-gen z       = (race == 1)            // time-invariant baseline
-gen y0_pre  = 1000 + alpha_i + rnormal(0, 5)
-gen y0_post = y0_pre + 100 + 500*z   // Z bites in post
-
-* Additive-X (without Post*Z):
-reghdfe y z, absorb(id year) cluster(id)   // Z is collinear with FE, dropped
-
-* The fix:
-reghdfe y c.z##i.post, absorb(id year) cluster(id)   // Post*Z survives
-\end{lstlisting}
-
-\vspace{0.3em}
-\begin{itemize}\setlength\itemsep{2pt}
-  \item Top regression: $Z$ has no effect because the FE absorbs it.
-  \item Bottom regression: $\text{Post}\times Z$ survives the FE transformation.
-\end{itemize}
-\end{frame}
-
-%% ---------- L2-F2b: PROOF step 1 — TWFE-with-X and the conditional-PT identity ----------
 \begin{frame}{Proof, step 1 --- the TWFE model and what conditional PT gives us}
 \vspace{0.4em}
 \textbf{The TWFE model with one covariate $X$:}
@@ -459,28 +280,44 @@ Both potential outcomes carry the \textit{same} $\beta$ in $X$. \;Subtract: ATT 
 \end{frame}
 
 %% ---------- L2-F2d2: Stata simulation showing heterogeneous tau in X ----------
-\begin{frame}[fragile]{Heterogeneous $\delta(X)$ in code: build $Y(0)$ and $Y(1)$ by hand}
+\begin{frame}[fragile]{Build $Y(0)$ and $Y(1)$ by hand --- homogeneous vs.\ heterogeneous in $X$}
+\vspace{0.2em}
 \footnotesize
-\begin{lstlisting}[language={[ANSI]C},basicstyle=\ttfamily\scriptsize]
-* Y(0) as a function of two covariates (age and gpa)
-gen y0 = 15000 + 10.25*age - 10.5*age_sq                ///
-              + 1000*gpa  - 10.5*gpa_sq                 ///
-              + 500*age*gpa + rnormal(0, 5)
-
-* Y(1) is Y(0) PLUS a treatment effect that varies with X
-gen y1    = y0 + 2500 + 100*age + 1000*gpa
-gen delta = y1 - y0      // tau(X) = 2500 + 100*age + 1000*gpa
-
-summarize delta              // ATE
-summarize delta if treat==1  // ATT
-\end{lstlisting}
-
+Same $Y(0)$ in both. \;The treatment effect $Y(1) - Y(0)$ is either a \textit{constant} or a \textit{function of $X$}.
 \vspace{0.4em}
-\textbf{Look at the construction.}
+\begin{columns}[T,onlytextwidth]
+\column{0.48\textwidth}
+\textbf{Homogeneous TE in $X$ \;(Assumption 4 holds)}
+\begin{lstlisting}[basicstyle=\ttfamily\tiny]
+gen y0 = 15000 + 10.25*age - 10.5*age_sq ///
+              + 1000*gpa - 10.5*gpa_sq   ///
+              + 500*age*gpa + e
+label var y0 "Earnings w/o degree"
+
+gen y1 = y0 + 2500
+label var y1 "Earnings with degree"
+
+* delta = 2500 for everyone.
+\end{lstlisting}
+\column{0.04\textwidth}\hfill
+\column{0.48\textwidth}
+\textbf{Heterogeneous TE in $X$ \;(Assumption 4 fails)}
+\begin{lstlisting}[basicstyle=\ttfamily\tiny]
+gen y0 = 15000 + 10.25*age - 10.5*age_sq ///
+              + 1000*gpa - 10.5*gpa_sq   ///
+              + 500*age*gpa + e
+label var y0 "Earnings w/o degree"
+
+gen y1 = y0 + 2500 + 100*age + 1100*gpa
+label var y1 "Earnings with degree"
+
+* delta(X) = 2500 + 100*age + 1100*gpa.
+\end{lstlisting}
+\end{columns}
+\vspace{0.5em}
 \begin{itemize}\setlength\itemsep{1pt}
-  \item Look at $Y(0)$. \;Look at $Y(1)$. \;\highlight{Look how $Y(1)$ varies with $X$.}
-  \item $\delta_i = 2500 + 100\,\text{age}_i + 1000\,\text{gpa}_i$ --- a 1-year-older worker gets \$100 more from training; a 1-GPA-point higher worker gets \$1{,}000 more.
-  \item ATE $\neq$ ATT whenever treated and control $X$-distributions differ. \;\;\meta{$\to$ balancing tables next.}
+  \item \textbf{Left:} $Y(0)$ and $Y(1)$ share \textit{the same} slope on $X$. \;ATT $= 2{,}500$ for everyone. TWFE-with-$X$ recovers it.
+  \item \textbf{Right:} $Y(1)$ slopes differ. \;A 1-year-older worker gains \$100 more; a 1-GPA-point higher worker gains \$1{,}100 more. \;\highlight{TWFE fits one $\delta$, misses the variation.}
 \end{itemize}
 \end{frame}
 
@@ -503,6 +340,323 @@ summarize delta if treat==1  // ATT
 \highlight{This is a structural assumption on the DGP.} \;OLS doesn't tell you you're making it. The math does. \\[0.2em]
 If the effect actually varies with $X$, TWFE-with-$X$ averages across the variation and gives you a weighted parameter you didn't ask for.
 \end{center}
+\end{frame}
+
+%% ---------- L2-DX-1a: RCT analogy ----------
+\begin{frame}{$\text{Bias}_{\Delta X}$: the RCT analogy}
+\vspace{0.5em}
+Earnings $Y$ depends on a million $X$s: \;gender, age, education, neighborhood, race, occupation, parental income, $\ldots$
+
+\vspace{1.2em}
+Randomization \textit{balances} those $X$s across treated and control.
+
+\vspace{0.8em}
+\begin{center}
+\highlight{The $X \to Y$ channels cancel.}
+\end{center}
+\end{frame}
+
+%% ---------- L2-DX-1b: DiD without randomization ----------
+\begin{frame}{DiD doesn't get balance for free}
+\vspace{0.6em}
+If treated and control look different on $X$, and those $X$s drive how $Y(0)$ moves over time, the group-level $Y(0)$ trends diverge.
+
+\vspace{1.2em}
+\begin{center}
+\highlight{And PTA on $Y(0)$ fails.}
+\end{center}
+\end{frame}
+
+%% ---------- L2-DX-1c: Gender setup ----------
+\begin{frame}{A simple example: gender}
+\vspace{0.4em}
+$\Delta Y(0)$ \;over the panel:
+\begin{itemize}\setlength\itemsep{0.4em}
+  \item Men: \;$+\$2$
+  \item Women: \;$+\$1$
+\end{itemize}
+
+\vspace{1em}
+\highlight{No treatment effect anywhere.} \;Earnings just drift up faster for men than for women.
+
+\vspace{1em}
+Composition: \;\textbf{75\% male in treated, 25\% male in control.}
+\end{frame}
+
+%% ---------- L2-DX-1d: The arithmetic ----------
+\begin{frame}{Naive DiD reads the gap}
+\vspace{0.6em}
+\begin{align*}
+\mathbb{E}[\Delta Y(0) \mid D{=}1] &\;=\; 0.75(2) + 0.25(1) \;=\; 1.75 \\[0.4em]
+\mathbb{E}[\Delta Y(0) \mid D{=}0] &\;=\; 0.25(2) + 0.75(1) \;=\; 1.25
+\end{align*}
+
+\vspace{1em}
+\begin{center}
+\highlight{Naive DiD: $1.75 - 1.25 = +0.50$ --- pure imbalance bias.}
+\end{center}
+\end{frame}
+
+%% ---------- L2-DX-2a: Formal setup ----------
+\begin{frame}{Formal: Y(0) trend depends on X}
+\vspace{0.6em}
+Let
+\[
+Y(0)_{it} \;=\; \alpha_i \;+\; \gamma_t \;+\; \beta_t \,X_i \;+\; \varepsilon_{it}
+\]
+where $X_i$ is time-invariant but its coefficient $\beta_t$ can drift.
+
+\vspace{0.8em}
+Differencing pre-to-post:
+\[
+\Delta Y(0)_i \;=\; \Delta\gamma \;+\; (\beta_{\text{post}} - \beta_{\text{pre}})\cdot X_i.
+\]
+\end{frame}
+
+%% ---------- L2-DX-2b: The product ----------
+\begin{frame}{The bias factors into trend $\times$ imbalance}
+\vspace{1em}
+\[
+\text{Bias}_{\Delta X} \;=\; \underbrace{(\beta_{\text{post}} - \beta_{\text{pre}})}_{\text{$X$-specific trend in $Y(0)$}} \;\times\; \underbrace{\big(\mathbb{E}[X \mid D{=}1] - \mathbb{E}[X \mid D{=}0]\big)}_{\text{imbalance on $X$}}
+\]
+
+\vspace{1.4em}
+\begin{center}
+\highlight{It's a product. \;Either factor at zero kills it.}
+\end{center}
+\end{frame}
+
+%% ---------- L2-DX-2c: Either factor at zero ----------
+\begin{frame}{Either factor at zero kills it}
+\vspace{0.8em}
+\begin{itemize}\setlength\itemsep{1.2em}
+  \item Balance $X$ across groups \;$\Rightarrow$\; no bias, even with strong $\beta_t$ drift.
+  \item Constant $\beta$ \;$\Rightarrow$\; no bias, even with strong imbalance.
+\end{itemize}
+\end{frame}
+
+%% ---------- L2-DX-2d: Imbalance is the root ----------
+\begin{frame}{Imbalance is the root}
+\vspace{0.6em}
+Randomization (in an RCT) zeroes the imbalance term --- so it doesn't matter what $X$-specific dynamics exist.
+
+\vspace{1.2em}
+Without randomization, conditioning on $X$ does the same job.
+
+\vspace{0.8em}
+\begin{center}
+\highlight{DR / IPW / OR are just different ways to re-weight toward balance.}
+\end{center}
+\end{frame}
+
+%% ---------- L2-DX-3: Bias_DeltaX — Stata, gender example ----------
+\begin{frame}[fragile]{The gender example in Stata}
+\footnotesize
+\begin{lstlisting}[language={[ANSI]C},basicstyle=\ttfamily\scriptsize]
+* Gender is time-invariant -- but its effect on Y(0) drifts over time.
+*   delta Y(0) = +2 for men, +1 for women   (no treatment effect)
+* Composition: 75% male in treated, 25% male in control.
+
+gen y0_pre  = 1000 + 100*male + rnormal(0, 5)
+gen y0_post = y0_pre + 2*male + 1*(1 - male)
+
+mean y0_post if treat == 1                 // 1.75 in expectation
+mean y0_post if treat == 0                 // 1.25 in expectation
+\end{lstlisting}
+
+\vspace{0.6em}
+\begin{center}
+\highlight{$1.75 - 1.25 = 0.50$. \;Imbalance $\times$ drift in $\beta_t$.}
+\end{center}
+\end{frame}
+
+%% =========================================================================
+%%   Title X clinics — changing-betas × imbalance, with event-study reveal
+%% =========================================================================
+
+%% ---------- L2-DX-4a: The violation we want to demonstrate ----------
+\begin{frame}{A worked example of the violation}
+\vspace{0.8em}
+We'll build a world where:
+\begin{itemize}\setlength\itemsep{0.6em}
+  \item the true treatment effect is \textit{positive},
+  \item the covariate's effect on $Y(0)$ \textit{changes sharply at the year of treatment},
+  \item and the covariate is \textit{imbalanced} across treated and control.
+\end{itemize}
+
+\vspace{0.8em}
+\begin{center}
+\highlight{Then we run a plain DiD and see what we get.}
+\end{center}
+\end{frame}
+
+%% ---------- L2-DX-4b: What we built in ----------
+\begin{frame}{What we built in}
+\vspace{0.5em}
+500 counties, 10 years, treatment in year 6. \;Outcome: \;county birth rate.
+
+\vspace{0.8em}
+\begin{itemize}\setlength\itemsep{0.6em}
+  \item \textbf{True effect:} \;$+0.6$ at year 6 $\to$ $+3.0$ by year 10. \;ATT $\approx +1.8$.
+  \item \textbf{Covariate trend:} \;urban $Y(0)$ slope shifts from $\sim\!-0.1$ to $-2.5$ at year 6. \;Rural flat.
+  \item \textbf{Imbalance:} \;$\Pr(\text{treated} \mid \text{urban}) = 0.70$, \;$\Pr(\text{treated} \mid \text{rural}) = 0.30$.
+\end{itemize}
+
+\vspace{0.8em}
+\begin{center}
+\highlight{Changing $\beta_t$ on urban, kicking in exactly when treatment does.}
+\end{center}
+\end{frame}
+
+%% ---------- L2-DX-4c: The DGP in Stata ----------
+\begin{frame}[fragile]{The DGP}
+\scriptsize
+\begin{lstlisting}[language={[ANSI]C},basicstyle=\ttfamily\tiny]
+set seed 12345
+set obs 500
+gen county_id = _n
+gen urban = (runiform() < 0.5)
+gen treated = (urban==1 & runiform()<0.7) | (urban==0 & runiform()<0.3)
+gen treat_date = cond(treated, 6, 0)
+expand 10
+bysort county_id: gen year = _n
+gen post = (year >= 6)
+
+* Smaller urban decline, nearly flat rural increase
+bys county_id: gen trend = .
+replace trend = -0.15*urban + 0.1*(1-urban) if year==1
+replace trend = -0.25*urban + 0.1*(1-urban) if year==2
+replace trend = -0.15*urban + 0.1*(1-urban) if year==3
+replace trend = -0.10*urban + 0.1*(1-urban) if year==4
+replace trend = -0.10*urban + 0.1*(1-urban) if year==5
+replace trend = -0.50*urban + 0.1*(1-urban) if year==6
+replace trend = -1.00*urban + 0.1*(1-urban) if year==7
+replace trend = -1.50*urban + 0.1*(1-urban) if year==8
+replace trend = -2.00*urban + 0.1*(1-urban) if year==9
+replace trend = -2.50*urban + 0.1*(1-urban) if year==10
+
+bys county_id: gen county_fe = rnormal(0, 2)
+bys county_id: gen u = rnormal(0, 1)
+gen y0 = 15 + county_fe + trend*year + u
+gen y1 = y0 + post*treated*(year - 5)*0.6
+gen birth_rate = treated*y1 + (1-treated)*y0
+\end{lstlisting}
+\end{frame}
+
+%% ---------- L2-DX-4d: Naive event study figure ----------
+\begin{frame}{Run a DiD event study}
+\vspace{0.2em}
+\begin{center}
+\includegraphics[width=0.68\linewidth]{figures/titlex_es_naive.pdf}
+\end{center}
+
+\vspace{0.2em}
+\begin{center}
+\highlight{Pre-trends flat. \;Truth was $+1.8$. \;We got $-3.3$.}
+\end{center}
+\end{frame}
+
+%% ---------- L2-DX-4e: We can recover this — figure ----------
+\begin{frame}{We can recover this with the methods today}
+\vspace{0.2em}
+\begin{center}
+\includegraphics[width=0.68\linewidth]{figures/titlex_es_urban.pdf}
+\end{center}
+
+\vspace{0.2em}
+\begin{center}
+\highlight{Same event study, conditioned on urban. \;ATT $\approx +1.75$.}
+\end{center}
+\end{frame}
+
+%% ---------- L2-DX-4f: The fix codeblock (brief) ----------
+\begin{frame}[fragile]{One extra variable}
+\vspace{0.6em}
+\begin{lstlisting}[language={[ANSI]C},basicstyle=\ttfamily\small]
+* Naive
+estat event after a plain DiD          // ATT ~ -3.3
+
+* Conditioned on urban
+estat event after a DiD with urban     // ATT ~ +1.75
+\end{lstlisting}
+
+\vspace{1em}
+\begin{center}
+\highlight{We'll meet the estimators that do this --- DR, IPW, OR --- next.}
+\end{center}
+\end{frame}
+
+%% ---------- L2-DX-4g: The lesson ----------
+\begin{frame}{Pre-trends don't protect us from imbalance}
+\vspace{0.8em}
+The pre-trends test asks: \textit{did $Y(0)$ move in parallel before treatment?}
+
+\vspace{0.8em}
+It can't see a $\beta_t$-on-$X$ shock that turns on at the year of treatment --- the one that imbalance is about to amplify.
+
+\vspace{1em}
+\begin{center}
+\highlight{Pre-trends are necessary. \;They are not sufficient.}
+\end{center}
+
+\vspace{0.6em}
+\begin{center}
+Balance on $X$ is the second piece of evidence we need.
+\end{center}
+\end{frame}
+
+%% ---------- L2-DX-4: Balance tables — heuristic check, NOT identification ----------
+\begin{frame}{Heuristic check: balance tables on $X$}
+\footnotesize
+You can't test PTA on $Y(0)$ directly --- it's counterfactual.
+
+\vspace{0.4em}
+\textbf{What you CAN check:} \;is $X$ balanced across treated and control?
+\begin{itemize}\setlength\itemsep{2pt}
+  \item \textbf{Levels} ($\mathbb{E}[X \mid D{=}1] = \mathbb{E}[X \mid D{=}0]$?) --- matters when $X$'s effect varies over time.
+  \item \textbf{Trends} ($\mathbb{E}[\Delta X \mid D{=}1] = \mathbb{E}[\Delta X \mid D{=}0]$?) --- matters under constant $\beta$.
+\end{itemize}
+
+\vspace{0.5em}
+\textbf{Baker et al.\ (2025, \textit{Journal of Economic Literature}) Table 2} reports both: a panel of pre-period $X$ levels and a panel of $X$ differences across years. \;Both panels matter because both are channels through which imbalance creates $\text{Bias}_{\Delta X}$.
+
+\vspace{0.5em}
+\highlight{Identification vs.\ heuristic.} \;PTA on $Y(0)$ is the identifying assumption. \;Balance on $X$ is a heuristic check. \;Same epistemic status as the pre-period parallel-trends test: it's evidence, not proof.
+\end{frame}
+
+%% =========================================================================
+%%   Bias_FE — time-invariant X eaten by the FE transformation.
+%% =========================================================================
+
+%% ---------- L2-FE-1: Time-varying X — bad control ----------
+\begin{frame}{Time-varying $X$: the bad-control problem}
+\vspace{0.4em}
+\textbf{The trap.} \;A time-varying covariate is measured both before \textit{and after} treatment. If $D \to X$ (treatment changes $X$), then post-period $X$ is not a pre-treatment characteristic --- it's a partial \textit{outcome}.
+\vspace{0.6em}
+\begin{itemize}\setlength\itemsep{0.4em}
+  \item Conditioning on post-treatment $X$ blocks part of the causal channel $D \to Y$ (mediator bias).
+  \item Worse, if $X$ has unobserved common causes with $Y$, conditioning opens a back-door collider path (Angrist--Pischke ``bad control'').
+\end{itemize}
+\vspace{0.5em}
+\textbf{The condition you need.} \;$X(1) = X(0)$ --- treatment doesn't move $X$. \;Equivalently: use only pre-period $X$, since by no-anticipation $X_{i,0} = X_i(0)$ mechanically.
+\vspace{0.4em}
+\meta{Rule of thumb: don't condition on anything that could be a downstream consequence of $D$. \;Demographics and baseline $X$ are safe. \;Income or employment status measured post-treatment is not.}
+\end{frame}
+
+%% ---------- L2-FE-2: Time-invariant baseline X — eaten by FE ----------
+\begin{frame}{Time-invariant baseline $X$: eaten by the fixed effect}
+\vspace{0.4em}
+\textbf{The other trap.} \;You wisely use \textit{baseline} (pre-period) $X$ to avoid the bad-control problem above. But then:
+\vspace{0.6em}
+\begin{itemize}\setlength\itemsep{0.4em}
+  \item Within-unit demeaning makes $\tilde{X}_{it} = X_{it} - \bar{X}_i = 0$ if $X$ is time-invariant.
+  \item So \texttt{race}, \texttt{education at baseline}, \texttt{pre-program earnings} --- the kind of $X$ you needed to defend CPT --- vanish.
+  \item Additive-$X$ TWFE estimates as if you'd never included them.
+\end{itemize}
+\vspace{0.5em}
+\textbf{The fix.} \;Enter $X$ as $\text{Post} \times X_{i,0}$. \;Post varies within unit, so the FE cannot eat the interaction.
+\vspace{0.4em}
+\meta{The double bind: time-varying $X$ is a bad control; time-invariant $X$ gets eaten by $\alpha_i$. \;$\text{Post}\times X_{i,0}$ is the escape valve.}
 \end{frame}
 
 

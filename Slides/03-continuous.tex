@@ -545,6 +545,21 @@ The decomposition \textit{is} the regression.
 \end{center}
 \end{frame}
 
+\begin{frame}{Negative weights aren't a bug --- they're the price}
+\vspace{0.4em}
+
+\begin{itemize}\setlength\itemsep{0.5em}
+  \item \textbf{Q1, Q2 (level, scaled-level).} \;Clean comparison: treated dose $d$ vs.\ untreated. \;Weights forced to sum to zero $\Rightarrow$ below-mean doses get \textit{negative} weights.
+  \item \textbf{Q4 (2$\times$2).} \;Weights non-negative, integrate to 1 --- but compare two \textit{treated} industries to each other. \;A forbidden contrast.
+  \item \textbf{Q3 (ACRT).} \;In between: non-negative weights, but the answer is a derivative, not a level.
+\end{itemize}
+
+\vspace{0.5em}
+\begin{center}
+\highlight{Clean comparisons cost you negative weights. \;Tidy weights cost you forbidden comparisons. \;Pick your poison.}
+\end{center}
+\end{frame}
+
 \begin{frame}{The takeaway from the decomposition}
 \vspace{0.2cm}
 
@@ -943,15 +958,147 @@ Partition dose into intervals (e.g., $[0, 5)$, $[5, 10)$, $\ldots$). \;Estimate 
 \highlight{Often the right first cut. \;Rarely the final analysis.}
 \end{frame}
 
+%% ---------- Why not shrink the bins? ----------
+\begin{frame}{Why not just shrink the bins?}
+\vspace{0.6em}
+
+If bins of width $h$ work, why not let $h \to 0$ and recover a curve?
+
+\vspace{1em}
+
+\begin{itemize}\setlength\itemsep{0.5em}
+  \item Each bin holds fewer observations as $h$ shrinks. \;The bin average gets noisier.
+  \item Variance grows faster than bias falls. \;The estimator stops converging.
+  \item Inside a bin the slope is zero. \;You can't read $\text{ACRT}(d)$ off a step function.
+  \item Step functions don't have derivatives. \;You can't take limits.
+\end{itemize}
+
+\vspace{0.6em}
+\begin{center}
+\highlight{Fine bins are not the answer. \;We need a smooth curve.}
+\end{center}
+\end{frame}
+
+%% ---------- Splines ----------
+\begin{frame}{Splines: smooth piecewise polynomials}
+\vspace{0.5em}
+
+A spline is a curve made of low-degree polynomial pieces joined smoothly at \textbf{knot} points.
+
+\vspace{0.9em}
+
+\textbf{Cubic B-splines} (the standard):
+\begin{itemize}\setlength\itemsep{0.3em}
+  \item Each piece is a cubic. \;Pieces meet with continuous first and second derivatives.
+  \item Place knots at sample quantiles of $D$ --- resolution where the data is.
+  \item Number of knots controls smoothness: few knots = smooth, many knots = wiggly.
+  \item Fit by OLS on the basis vector $\psi(D_i) = (\psi_1(D_i), \ldots, \psi_K(D_i))$.
+\end{itemize}
+
+\vspace{0.6em}
+\begin{center}
+\highlight{Smooth, differentiable, far fewer parameters than fine bins.}
+\end{center}
+\end{frame}
+
+%% ---------- Kernel regression ----------
+\begin{frame}{Kernel regression: another way to smooth}
+\vspace{0.6em}
+
+At each dose $d$, average outcomes from nearby observations, weighted by a kernel:
+\[
+\widehat m(d) \;=\; \frac{\sum_i K_h(D_i - d) \cdot \Delta\tilde Y_i}{\sum_i K_h(D_i - d)}
+\]
+
+\vspace{0.6em}
+
+\begin{itemize}\setlength\itemsep{0.3em}
+  \item $K$ is a weight function (Gaussian, Epanechnikov, $\ldots$).
+  \item Bandwidth $h$ controls smoothness. \;Small $h$ = local, noisy. \;Large $h$ = smooth, biased.
+\end{itemize}
+
+\vspace{0.7em}
+\begin{center}
+\highlight{Splines fit globally with $K$ knots. \;Kernels fit locally with a bandwidth. \;Same goal.}
+\end{center}
+\end{frame}
+
+%% ---------- CBS methodology ----------
+\begin{frame}{CBS use B-spline sieve regression}
+\vspace{0.6em}
+
+The \texttt{contdid} package implements CBS's recipe. \;It wraps Chen--Christensen--Kankanala's \texttt{npiv}.
+
+\vspace{0.9em}
+
+Three steps:
+\begin{enumerate}\setlength\itemsep{0.4em}
+  \item Center the outcome: \;$\Delta\tilde Y_i = \Delta Y_i - \widehat m(0)$, \;where $\widehat m(0)$ is the average $\Delta Y$ for untreated units.
+  \item B-spline regression of $\Delta\tilde Y_i$ on $\psi(D_i)$, \;using only treated units ($D_i > 0$).
+  \item Bootstrap to get pointwise confidence bands on the fitted curve.
+\end{enumerate}
+
+\vspace{0.5em}
+\begin{center}
+\highlight{Returns $\widehat{\text{ATT}}(d \mid d)$ as a continuous function of $d$, with standard errors at every $d$.}
+\end{center}
+\end{frame}
+
+%% ---------- Assumptions ----------
+\begin{frame}{What we have to assume}
+\vspace{0.4em}
+
+\begin{itemize}\setlength\itemsep{0.7em}
+  \item \textbf{Strong parallel trends.} \;$E[\Delta Y(0) \mid D = d] = E[\Delta Y(0) \mid D = 0]$ for \textit{every} $d$ --- not just $d = 0$ vs.\ $d > 0$. \;Rules out selection-on-dose-response.
+  \item \textbf{Smoothness of $\text{ATT}(d \mid d)$.} \;Continuous, bounded derivative in $d$. \;The sieve approximates a smooth function, not arbitrary jumps.
+  \item \textbf{Overlap.} \;Enough observations near every $d$ where the curve is estimated.
+  \item \textbf{Tuning chosen sensibly.} \;Number of knots from cross-validation or a rule of thumb.
+\end{itemize}
+
+\vspace{0.4em}
+\begin{center}
+\highlight{Strong PT is the load-bearing assumption. \;The rest are technical.}
+\end{center}
+\end{frame}
+
+%% ---------- The formula ----------
+\begin{frame}{The estimator, formally}
+\vspace{0.7em}
+
+Let $\psi(d) = (\psi_1(d), \ldots, \psi_K(d))^\top$ be the cubic B-spline basis at dose $d$.
+
+\vspace{0.9em}
+
+Fit OLS on the treated units:
+\[
+\widehat\theta \;=\; \arg\min_\theta \;\sum_{i: D_i > 0} \big(\Delta\tilde Y_i - \theta^\top \psi(D_i)\big)^2
+\]
+
+\vspace{0.9em}
+
+The dose-response curve and its derivative:
+\[
+\widehat{\text{ATT}}(d \mid d) \;=\; \widehat\theta^\top \psi(d)
+\qquad
+\widehat{\text{ACRT}}(d) \;=\; \widehat\theta^\top \psi'(d)
+\]
+
+\vspace{0.5em}
+\begin{center}
+\highlight{One regression delivers both target parameters.}
+\end{center}
+\end{frame}
+
+%% ---------- Option 3: Non-parametric smoothing (figure) ----------
 \begin{frame}{Option 3: Non-parametric smoothing}
 \vspace{0.1cm}
 \begin{center}
-\includegraphics[width=0.78\textwidth,height=0.70\textheight,keepaspectratio]{figures/dxt/continuous_smoothed_avgs.pdf}
+\includegraphics[width=0.74\textwidth,height=0.62\textheight,keepaspectratio]{figures/dxt/continuous_smoothed_avgs.pdf}
 \end{center}
-\vspace{-0.05cm}
+\vspace{0.3em}
 \begin{center}
 \footnotesize\color{warmgray}\itshape
-Replace the bins with a kernel or spline. \;A continuous $\widehat{\text{ATT}}(\cdot)$ over the dose range, with pointwise confidence bands.
+A continuous $\widehat{\text{ATT}}(\cdot)$ over the dose range, with pointwise confidence bands.
 \end{center}
 \end{frame}
 

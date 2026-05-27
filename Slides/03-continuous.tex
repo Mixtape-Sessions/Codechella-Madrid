@@ -932,45 +932,45 @@ Each treated dose-group's DiD versus the never-treated: $\widehat{\text{ATT}}(1 
 
 %% ---------- Backwards vs. Forwards engineering ----------
 \begin{frame}{Backwards engineering vs.\ Forwards engineering}
-\vspace{0.1em}
+\vspace{0em}
 
 \begin{columns}[T]
 
 \begin{column}{0.46\textwidth}
-\textbf{\color{red!70!black}Backwards engineering}
-\vspace{0.2em}
-\begin{itemize}\setlength\itemsep{1pt}\footnotesize
-  \item Run TWFE (or OLS) of $\Delta Y_i$ on $D_i$.
-  \item FWL: the coefficient is a weighted average of dose-specific treatment effects.
-  \item Weights come from the variance of $D$ conditional on controls.
-  \item Some weights are \textbf{negative}; they vary across the dose distribution.
-  \item No recognizable causal parameter in sight.
+\textbf{\color{red!70!black}Backwards}
+\vspace{0.1em}
+\begin{itemize}\setlength\itemsep{0pt}\footnotesize
+  \item Run TWFE; let OLS hand you a number.
+  \item FWL: that number is a weighted average of dose effects.
+  \item Weights come from $\text{Var}(D \mid \text{controls})$.
+  \item Some weights are \textbf{negative}; they shift across the dose distribution.
+  \item No causal parameter in sight.
 \end{itemize}
 \end{column}
 
 \begin{column}{0.06\textwidth}
 \begin{center}
-\vspace{2.5em}
+\vspace{2em}
 \color{warmgray}\Large$\to$
 \end{center}
 \end{column}
 
 \begin{column}{0.47\textwidth}
-\textbf{\color{remixgreendark}Forwards engineering}
-\vspace{0.2em}
-\begin{itemize}\setlength\itemsep{1pt}\footnotesize
+\textbf{\color{remixgreendark}Forwards}
+\vspace{0.1em}
+\begin{itemize}\setlength\itemsep{0pt}\footnotesize
   \item Name the target: $\text{ATT}(d \mid d)$ or $\text{ACRT}(d)$.
-  \item State assumptions you are willing to defend.
-  \item Build an estimator that is right on average if those assumptions hold --- and has low variance.
-  \item The estimator's meaning is known \textit{before} you run it.
+  \item State assumptions you'll defend.
+  \item Build an estimator that's right on average under those assumptions.
+  \item Meaning of the estimate is known \textit{before} you run it.
 \end{itemize}
 \end{column}
 
 \end{columns}
 
-\vspace{0.3em}
+\vspace{0.5em}
 \begin{center}
-\highlight{CBS is forwards engineering. \;TWFE with continuous $D$ is backwards.}
+\highlight{CBS is forwards. \;TWFE with continuous $D$ is backwards.}
 \end{center}
 \end{frame}
 

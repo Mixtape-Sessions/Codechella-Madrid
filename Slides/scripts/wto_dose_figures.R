@@ -369,28 +369,43 @@ w_acrt    <- surv / sum(surv) / mean(diff(ls))
 fD_scaled <- fD / max(fD) * max(w_acrt) * 0.55
 dat3 <- tibble(l = ls, w = w_acrt, dens = fD_scaled)
 
+# Both curves decay from the left, getting close in the tail — arrows
+# can't reliably connect a label to the dashed density curve without
+# crossing the solid ACRT curve. Use a clean two-row custom legend in the
+# upper-right cream space (where both curves have decayed near zero).
+y_axis_top <- max(w_acrt) * 1.08
+legend_x_seg_lo <- 0.31
+legend_x_seg_hi <- 0.36
+legend_x_text   <- 0.37
+y_legend_top    <- y_axis_top * 0.88
+y_legend_bot    <- y_axis_top * 0.76
+
 p09 <- ggplot(dat3, aes(x = l)) +
   geom_ribbon(aes(ymin = 0, ymax = w), fill = LIGHTTEAL, alpha = 0.7) +
   geom_line(aes(y = w), colour = TEALDARK, linewidth = 1.3) +
   geom_line(aes(y = dens), colour = WARMGRAY,
             linetype = "dashed", linewidth = 0.7) +
-  annotate("text", x = 0.18, y = max(w_acrt) * 0.95,
-           label = expression(w^acrt*(l)), colour = TEALDARK,
-           fontface = "bold", size = 4.2, hjust = 0) +
-  annotate("text", x = 0.30,
-           y = fD_scaled[which.min(abs(ls - 0.05))] * 0.5,
-           label = "dose density  f[D](l)  (rescaled)",
-           colour = WARMGRAY, fontface = "italic", size = 3.2,
-           hjust = 0, parse = FALSE) +
-  annotate("segment", x = 0.30,
-           y = fD_scaled[which.min(abs(ls - 0.05))] * 0.5 + 0.4,
-           xend = 0.36,
-           yend = fD_scaled[which.min(abs(ls - 0.30))] + 0.4,
-           colour = WARMGRAY, linewidth = 0.4,
-           arrow = arrow(length = unit(0.1, "cm"), type = "closed")) +
+  # Legend row 1: ACRT weight (solid teal)
+  annotate("segment",
+           x = legend_x_seg_lo, xend = legend_x_seg_hi,
+           y = y_legend_top, yend = y_legend_top,
+           colour = TEALDARK, linewidth = 1.3) +
+  annotate("text", x = legend_x_text, y = y_legend_top,
+           label = expression(w^"acrt"*(l)),
+           colour = TEALDARK, fontface = "bold",
+           size = 4.0, hjust = 0) +
+  # Legend row 2: dose density (dashed gray)
+  annotate("segment",
+           x = legend_x_seg_lo, xend = legend_x_seg_hi,
+           y = y_legend_bot, yend = y_legend_bot,
+           colour = WARMGRAY, linewidth = 0.7, linetype = "dashed") +
+  annotate("text", x = legend_x_text, y = y_legend_bot,
+           label = expression(f[D](l)~"  (rescaled)"),
+           colour = WARMGRAY, fontface = "italic",
+           size = 3.4, hjust = 0) +
   labs(x = "Dose  l", y = "Weight / density (rescaled)") +
   scale_x_continuous(limits = c(0, xmax), expand = c(0, 0)) +
-  scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +
+  scale_y_continuous(limits = c(0, y_axis_top), expand = c(0, 0)) +
   remix_theme
 
 ggsave(file.path(OUT_DIR, "09_weight_acrt.pdf"), p09,

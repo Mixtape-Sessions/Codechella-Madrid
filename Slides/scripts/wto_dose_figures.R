@@ -336,17 +336,26 @@ p08 <- ggplot(dat2, aes(x = l, y = w)) +
   geom_hline(yintercept = 0, colour = SLATE, linewidth = 0.4) +
   geom_vline(xintercept = ED, colour = ORANGE,
              linetype = "dashed", linewidth = 0.5) +
-  annotate("text", x = ED + 0.010, y = max(w_s) * 0.95,
+  # "still flips at E[D]" — top of plot, clean cream above the curve.
+  # Curve max in nearby x-range is ~7 (first lobe peak); label at y=13 is
+  # well clear.
+  annotate("text", x = ED + 0.010, y = 13,
            label = "still flips at E[D]", colour = ORANGE,
-           fontface = "bold", size = 3.4, hjust = 0) +
-  annotate("text", x = 0.005, y = min(w_s) * 0.65,
+           fontface = "bold", size = 3.0, hjust = 0) +
+  # "negative below mean" — orange wedge is tiny (min only -2.4), so place
+  # label just below the wedge in cream, color-keyed orange.
+  annotate("text", x = 0.005, y = -4,
            label = "negative\nbelow mean", colour = ORANGE,
-           fontface = "bold", size = 3.4, hjust = 0, lineheight = 0.9) +
-  annotate("text", x = 0.32, y = max(w_s) * 0.55,
+           fontface = "bold", size = 2.9, hjust = 0, lineheight = 0.85) +
+  # "mass pulled to high doses" — clean cream above the second-lobe peak,
+  # pointing the eye rightward toward the dominant rightmost lobe (peak 14
+  # at l=0.46). At x ∈ [0.30, 0.41] curve maxes at 7.3, so y=11 stays clear.
+  annotate("text", x = 0.30, y = 11,
            label = "mass pulled\nto high doses", colour = TEALDARK,
-           fontface = "bold", size = 3.4, hjust = 0, lineheight = 0.9) +
+           fontface = "bold", size = 2.9, hjust = 0, lineheight = 0.85) +
   labs(x = "Dose  l", y = expression(w^s*(l))) +
   scale_x_continuous(limits = c(0, xmax), expand = c(0, 0)) +
+  scale_y_continuous(limits = c(-6, 16), expand = c(0, 0)) +
   remix_theme
 
 ggsave(file.path(OUT_DIR, "08_weight_scaled_level.pdf"), p08,

@@ -234,10 +234,13 @@ cm <- sapply(ls, function(l) {
 cm_df <- tibble(l = ls, cm = cm) |> drop_na()
 cond_at_mean <- mean(doses[doses >= ED])
 
-# Position the long label up-and-left of the highlight point.
-# At ED ≈ 0.074, cond_at_mean ≈ 0.20+, leaving room above.
-label_x <- 0.18
-label_y <- cond_at_mean + 0.18
+# With the corrected dose distribution the conditional-mean curve climbs
+# steeply from E[D]=0.074 up to plateau ~0.46. Place the long label in the
+# bottom-right whitespace (below the plateau, above the E[D] dashed line),
+# right-aligned, with an arrow that traverses the empty region below the
+# curve back to the highlight point.
+label_x <- 0.49     # right edge of plot region
+label_y <- 0.22     # below curve everywhere; above E[D] dashed line
 p06 <- ggplot(cm_df, aes(x = l, y = cm)) +
   geom_line(colour = TEALDARK, linewidth = 1.2) +
   geom_hline(yintercept = ED, colour = ORANGE,
@@ -247,17 +250,21 @@ p06 <- ggplot(cm_df, aes(x = l, y = cm)) +
            colour = SLATE, linetype = "dotted", linewidth = 0.5) +
   annotate("point", x = ED, y = cond_at_mean,
            colour = TEALDARK, size = 2.8) +
-  annotate("text", x = label_x + 0.01, y = ED - 0.030,
+  # E[D] label, below the dashed line, on the right where there's space
+  annotate("text", x = 0.49, y = ED - 0.030,
            label = sprintf("E[D] = %.3f", ED),
            colour = ORANGE, fontface = "bold",
-           size = 3.6, hjust = 0) +
+           size = 3.6, hjust = 1) +
+  # Conditional-mean label: two lines, right-aligned in the bottom-right
   annotate("text", x = label_x, y = label_y,
-           label = sprintf("E[D | D >= E[D]]  ~  %.3f", cond_at_mean),
+           label = sprintf("E[D | D ≥ E[D]]\n= %.3f", cond_at_mean),
            colour = TEALDARK, fontface = "bold",
-           size = 3.6, hjust = 0) +
+           size = 3.6, hjust = 1, lineheight = 0.9) +
+  # Arrow from left edge of label region up-left to highlight point.
+  # Arrow path stays below the curve (curve is high above by then).
   annotate("segment",
-           x = label_x + 0.015, y = label_y - 0.018,
-           xend = ED + 0.005,   yend = cond_at_mean + 0.015,
+           x = 0.30, y = label_y + 0.005,
+           xend = ED + 0.005, yend = cond_at_mean - 0.005,
            colour = TEALDARK, linewidth = 0.4,
            arrow = arrow(length = unit(0.12, "cm"), type = "closed")) +
   scale_x_continuous(name = "Cutoff  l",

@@ -759,6 +759,33 @@ Y_{it}(d) \;=\; Y_{it}(0) \quad \text{for all } t < g_i
 \meta{Standard PT is the natural extension of binary-PT to a continuous setting.}
 \end{frame}
 
+%% ---------- The 2x2 falls out of No Anticipation ----------
+\begin{frame}{No Anticipation $\Rightarrow$ baseline is $Y(0)$ for everyone}
+\vspace{0.5em}
+
+A1 says: \;pre-treatment potential outcomes do not depend on the future dose.
+
+\vspace{0.8em}
+
+Combined with the data structure (no one is observationally treated yet in the pre-period), this gives:
+\[
+Y_{i,\text{pre}} \;=\; Y_{i,\text{pre}}(0) \quad \text{for every unit } i, \;\text{including those who get } D_i > 0 \text{ later.}
+\]
+
+\vspace{0.8em}
+
+\textbf{Why this matters.} \;Every DiD comparison the model can express is mechanically a 2$\times$2:
+\begin{itemize}\setlength\itemsep{0.2em}
+  \item \textit{before} = the common untreated trajectory (both groups).
+  \item \textit{after} = treated units show $Y(d)$; control units stay on $Y(0)$.
+\end{itemize}
+
+\vspace{0.4em}
+\begin{center}
+\highlight{The $(D \times \text{Post})$ interaction in TWFE is the mechanical consequence.}
+\end{center}
+\end{frame}
+
 \begin{frame}{Identification: ACRT requires more --- ``Strong PT''}
 \vspace{0.2cm}
 

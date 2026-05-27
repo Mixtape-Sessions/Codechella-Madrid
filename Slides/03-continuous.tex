@@ -974,24 +974,24 @@ Each treated dose-group's DiD versus the never-treated: $\widehat{\text{ATT}}(1 
 \end{center}
 \end{frame}
 
-%% ---------- Guido on LATE ----------
-\begin{frame}{Guido Imbens on this distinction}
-\vspace{0.3em}
+%% ---------- A familiar precedent: Wald IV and the LATE ----------
+\begin{frame}{A familiar precedent: Wald IV and the LATE}
+\vspace{0.1em}
 
-Imbens makes this point about IV and LATE (1994): \textbf{start with the parameter, then build the estimator.}
+The ATE had long been the target parameter.
 
-\vspace{0.5em}
+\vspace{0.4em}
 
-\begin{itemize}\setlength\itemsep{6pt}
-  \item IV with a binary instrument identifies the LATE --- the average effect for compliers.
-  \item That is a \textit{well-defined} causal parameter for a \textit{well-defined} subpopulation.
-  \item The alternative --- ``2SLS coefficient = something'' --- is backwards engineering. \;It works when effects are homogeneous; it obscures when they are not.
-  \item The same logic applies here: with continuous $D$, commit to $\text{ATT}(d \mid d)$, then estimate it.
+\begin{itemize}\setlength\itemsep{3pt}\footnotesize
+  \item Imbens \& Angrist (1994) started with an estimator --- Wald IV --- and worked out what it actually identifies under heterogeneous effects: the \textbf{LATE}, the average effect among compliers.
+  \item They met opposition. The LATE wasn't the ATE; critics argued you couldn't pick it ex ante.
+  \item Eventually the field came around. Today: name the target (LATE, ATT, $\ldots$) \textit{first}, then build the estimator.
+  \item We're doing the same move here. TWFE on continuous $D$ isn't the ATT. \;Pick $\text{ATT}(d \mid d)$ or $\text{ACRT}(d)$; then estimate.
 \end{itemize}
 
-\vspace{0.6em}
+\vspace{0.3em}
 \begin{center}
-{\small\color{warmgray}
+{\footnotesize\color{warmgray}
 \href{https://www.youtube.com/watch?v=QnwTdd-7BvY}%
 {\texttt{youtube.com/watch?v=QnwTdd-7BvY}}}
 \end{center}
@@ -1037,29 +1037,30 @@ The average of the dose-specific ATTs, taken over the treated dose distribution.
 \begin{frame}{Option 2: Bins --- a coarse dose-response curve}
 \vspace{0.1cm}
 \begin{center}
-\includegraphics[width=0.78\textwidth,height=0.70\textheight,keepaspectratio]{figures/dxt/continuous_binned_avgs.pdf}
+\includegraphics[width=0.78\textwidth,height=0.66\textheight,keepaspectratio]{figures/dxt/continuous_binned_avgs.pdf}
 \end{center}
-\vspace{-0.05cm}
+\vspace{0.2em}
 \begin{center}
-\footnotesize\color{warmgray}\itshape
-Partition dose into intervals (e.g., $[0, 5)$, $[5, 10)$, $\ldots$). \;Estimate one ATT per bin. \;Step-function dose response.
+\scriptsize\color{warmgray}\itshape
+Partition dose into intervals. \;Estimate one ATT per bin. \;Step-function dose response.
 \end{center}
 \end{frame}
 
 \begin{frame}{Pros and cons of bins}
-\vspace{0.2cm}
+\vspace{0.1cm}
 
 \textbf{Pros.}
-\begin{itemize}\small\setlength\itemsep{1pt}
+\begin{itemize}\footnotesize\setlength\itemsep{0pt}
   \item Easy to estimate; nothing more than a series of 2$\times$2's.
   \item Easy to communicate: ``effect at 5--10\% cut was X.''
   \item Bins can be chosen with policy thresholds in mind.
+  \item Identified under \textit{standard} parallel trends --- no need for Strong PT.
 \end{itemize}
 
-\vspace{0.4cm}
+\vspace{0.3cm}
 
 \textbf{Cons.}
-\begin{itemize}\small\setlength\itemsep{1pt}
+\begin{itemize}\footnotesize\setlength\itemsep{0pt}
   \item Inside a bin you average over a range of doses --- losing within-bin variation.
   \item Choice of bin width is a discretion knob.
   \item No standard error on the dose-response curve as a continuous object.

@@ -1245,18 +1245,22 @@ Estimating $\text{ATT}(d \mid d)$ as a smooth function of $d$ is a classical non
 
 The \texttt{contdid} package implements CBS's recipe. \;It wraps Chen--Christensen--Kankanala's \texttt{npiv}.
 
-\vspace{0.9em}
+\vspace{0.6em}
 
 Three steps:
-\begin{enumerate}\setlength\itemsep{0.35em}\footnotesize
+\begin{enumerate}\setlength\itemsep{0.25em}\footnotesize
   \item Center the outcome: \;$\Delta\tilde Y_i = \Delta Y_i - \widehat m(0)$, \;where $\widehat m(0)$ is the average $\Delta Y$ for untreated units.
-  \item B-spline regression of $\Delta\tilde Y_i$ on $\psi(D_i)$, \;using only treated units ($D_i > 0$). \;Here $\psi(d) = (\psi_1(d), \ldots, \psi_K(d))$ is the \textit{B-spline basis} --- $K$ pre-computed columns, one per basis function. \;In Stata: \;\texttt{mkspline} builds it.
-  \item Bootstrap to get pointwise confidence bands on the fitted curve.
+  \item Regress $\Delta\tilde Y_i$ on the B-spline basis $\psi(D_i)$, \;using only treated units ($D_i > 0$).
+  \item Bootstrap for pointwise confidence bands.
 \end{enumerate}
 
-\vspace{0.5em}
+\vspace{0.3em}
+{\footnotesize\color{slate}\itshape
+The ``B'' is for \textbf{basis}: $\psi(d) = (\psi_1(d), \ldots, \psi_K(d))$ is a bag of $K$ basis functions built from the knots. \;Knots set the structure; the basis is what you regress on (\texttt{mkspline} in Stata).}
+
+\vspace{0.2em}
 \begin{center}
-\highlight{Returns $\widehat{\text{ATT}}(d \mid d)$ as a continuous function of $d$, with standard errors at every $d$.}
+\highlight{Returns $\widehat{\text{ATT}}(d \mid d)$ as a continuous function, with SEs at every $d$.}
 \end{center}
 \end{frame}
 

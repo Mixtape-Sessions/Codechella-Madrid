@@ -470,6 +470,81 @@ Four overlaid weights, same distribution. \;$\widehat\beta^{\text{twfe}}$ is all
 \end{center}
 \end{frame}
 
+%% =========================================================================
+%%   FWL reconstruction on Kyle's WTO sample
+%% =========================================================================
+
+\begin{frame}{Let's verify it on Kyle's data}
+\vspace{0.6em}
+
+We've described the weights. \;Now let's actually compute them and rebuild $\widehat\beta^{\text{twfe}}$ by hand.
+
+\vspace{1em}
+
+Three steps:
+\begin{enumerate}\setlength\itemsep{0.4em}
+  \item Run OLS of $\Delta\ln\text{Theil}$ on dose. \;Save $\widehat\beta_{\text{OLS}}$.
+  \item Compute per-industry level weights $W_i = \dfrac{D_i - \bar D}{\sum_j (D_j - \bar D)^2}$.
+  \item Form $\sum_i W_i \cdot \Delta\ln\text{Theil}_i$ and compare.
+\end{enumerate}
+
+\vspace{0.6em}
+\begin{center}
+\highlight{If FWL is right, the two numbers are identical.}
+\end{center}
+\end{frame}
+
+\begin{frame}[fragile]{The reconstruction in Stata}
+\footnotesize
+\begin{lstlisting}[language={[ANSI]C},basicstyle=\ttfamily\scriptsize]
+* (1) beta_hat from OLS
+reg Delta_ln_theil dose
+local beta_ols = _b[dose]
+
+* (2) Per-industry level weights  W_i = (D_i - Dbar) / SS_D
+egen D_bar = mean(dose)
+gen  W_num = dose - D_bar
+egen SS_D  = total(W_num^2)
+gen  W     = W_num / SS_D
+
+* (3) Reconstruct beta_hat by hand
+gen  contrib = W * Delta_ln_theil
+egen beta_manual = total(contrib)
+\end{lstlisting}
+
+\vspace{0.4em}
+\begin{center}
+\highlight{R companion at \texttt{Labs/China-WTO/twfe\_reconstruction.\{R,do\}}}
+\end{center}
+\end{frame}
+
+\begin{frame}{$\widehat\beta^{\text{twfe}}$ is the weighted average. \;Exactly.}
+\vspace{0.4em}
+\begin{center}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{l@{\hspace{1.5em}}r}
+\toprule
+\textbf{Quantity} & \textbf{Value} \\
+\midrule
+$\widehat\beta_{\text{OLS}}$ from \texttt{reg Delta\_ln\_theil dose} & $-0.493524$ \\
+$\sum_i W_i \cdot \Delta\ln\text{Theil}_i$ \;(weighted sum) & $-0.493524$ \\
+\midrule
+$|\widehat\beta_{\text{OLS}} - \sum_i W_i \cdot \Delta\ln\text{Theil}_i|$ & $5.55 \times 10^{-17}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{0.6em}
+\begin{center}
+\highlight{Numerically identical to machine precision.}
+\end{center}
+
+\vspace{0.2em}
+\begin{center}
+The decomposition \textit{is} the regression.
+\end{center}
+\end{frame}
+
 \begin{frame}{The takeaway from the decomposition}
 \vspace{0.2cm}
 

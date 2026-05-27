@@ -1248,9 +1248,9 @@ The \texttt{contdid} package implements CBS's recipe. \;It wraps Chen--Christens
 \vspace{0.9em}
 
 Three steps:
-\begin{enumerate}\setlength\itemsep{0.4em}
+\begin{enumerate}\setlength\itemsep{0.35em}\footnotesize
   \item Center the outcome: \;$\Delta\tilde Y_i = \Delta Y_i - \widehat m(0)$, \;where $\widehat m(0)$ is the average $\Delta Y$ for untreated units.
-  \item B-spline regression of $\Delta\tilde Y_i$ on $\psi(D_i)$, \;using only treated units ($D_i > 0$).
+  \item B-spline regression of $\Delta\tilde Y_i$ on $\psi(D_i)$, \;using only treated units ($D_i > 0$). \;Here $\psi(d) = (\psi_1(d), \ldots, \psi_K(d))$ is the \textit{B-spline basis} --- $K$ pre-computed columns, one per basis function. \;In Stata: \;\texttt{mkspline} builds it.
   \item Bootstrap to get pointwise confidence bands on the fitted curve.
 \end{enumerate}
 

@@ -474,24 +474,30 @@ Four overlaid weights, same distribution. \;$\widehat\beta^{\text{twfe}}$ is all
 %%   FWL reconstruction on Kyle's WTO sample
 %% =========================================================================
 
-\begin{frame}{Let's verify it on Kyle's data}
-\vspace{0.6em}
+\begin{frame}[fragile]{Let's verify it with data}
+\vspace{0.4em}
 
 We've described the weights. \;Now let's actually compute them and rebuild $\widehat\beta^{\text{twfe}}$ by hand.
 
-\vspace{1em}
+\vspace{0.8em}
 
 Three steps:
-\begin{enumerate}\setlength\itemsep{0.4em}
+\begin{enumerate}\setlength\itemsep{0.3em}
   \item Run OLS of $\Delta\ln\text{Theil}$ on dose. \;Save $\widehat\beta_{\text{OLS}}$.
   \item Compute per-industry level weights $W_i = \dfrac{D_i - \bar D}{\sum_j (D_j - \bar D)^2}$.
   \item Form $\sum_i W_i \cdot \Delta\ln\text{Theil}_i$ and compare.
 \end{enumerate}
 
-\vspace{0.6em}
+\vspace{0.5em}
 \begin{center}
 \highlight{If FWL is right, the two numbers are identical.}
 \end{center}
+
+\vspace{0.5em}
+\begin{lstlisting}[basicstyle=\ttfamily\tiny\color{warmgray},frame=none,backgroundcolor=\color{white}]
+Labs/China-WTO/twfe_reconstruction.R    # R version
+Labs/China-WTO/twfe_reconstruction.do   # Stata version
+\end{lstlisting}
 \end{frame}
 
 \begin{frame}[fragile]{The reconstruction in Stata}

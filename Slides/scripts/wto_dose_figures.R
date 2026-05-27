@@ -234,13 +234,11 @@ cm <- sapply(ls, function(l) {
 cm_df <- tibble(l = ls, cm = cm) |> drop_na()
 cond_at_mean <- mean(doses[doses >= ED])
 
-# With the corrected dose distribution the conditional-mean curve climbs
-# steeply from E[D]=0.074 up to plateau ~0.46. Place the long label in the
-# bottom-right whitespace (below the plateau, above the E[D] dashed line),
-# right-aligned, with an arrow that traverses the empty region below the
-# curve back to the highlight point.
-label_x <- 0.49     # right edge of plot region
-label_y <- 0.22     # below curve everywhere; above E[D] dashed line
+# The conditional-mean curve climbs steeply from E[D]=0.074 to plateau ~0.46,
+# but the region below the curve and above the E[D] dashed line is a clean
+# wedge of whitespace that widens to the right. Place the label there, just
+# to the right of the highlight point, so the arrow stays short and tied to
+# the label rather than flying across the plot.
 p06 <- ggplot(cm_df, aes(x = l, y = cm)) +
   geom_line(colour = TEALDARK, linewidth = 1.2) +
   geom_hline(yintercept = ED, colour = ORANGE,
@@ -250,23 +248,23 @@ p06 <- ggplot(cm_df, aes(x = l, y = cm)) +
            colour = SLATE, linetype = "dotted", linewidth = 0.5) +
   annotate("point", x = ED, y = cond_at_mean,
            colour = TEALDARK, size = 2.8) +
-  # E[D] label, below the dashed line, on the right where there's space
+  # E[D] label, below the dashed line in the bottom-right
   annotate("text", x = 0.49, y = ED - 0.030,
            label = sprintf("E[D] = %.3f", ED),
            colour = ORANGE, fontface = "bold",
            size = 3.6, hjust = 1) +
-  # Conditional-mean label: two lines, right-aligned in the bottom-right
-  annotate("text", x = label_x, y = label_y,
-           label = sprintf("E[D | D ≥ E[D]]\n= %.3f", cond_at_mean),
-           colour = TEALDARK, fontface = "bold",
-           size = 3.6, hjust = 1, lineheight = 0.9) +
-  # Arrow from left edge of label region up-left to highlight point.
-  # Arrow path stays below the curve (curve is high above by then).
+  # Short arrow from the label down-left to the highlight point.
+  # Drawn before the text so the text overlays cleanly on its left edge.
   annotate("segment",
-           x = 0.30, y = label_y + 0.005,
-           xend = ED + 0.005, yend = cond_at_mean - 0.005,
+           x = 0.135, y = 0.172,
+           xend = ED + 0.004, yend = cond_at_mean + 0.004,
            colour = TEALDARK, linewidth = 0.4,
            arrow = arrow(length = unit(0.12, "cm"), type = "closed")) +
+  # Conditional-mean label sitting just to the right of the arrow tail
+  annotate("text", x = 0.145, y = 0.172,
+           label = sprintf("E[D | D ≥ E[D]] = %.3f", cond_at_mean),
+           colour = TEALDARK, fontface = "bold",
+           size = 3.6, hjust = 0) +
   scale_x_continuous(name = "Cutoff  l",
                      limits = c(0, xmax), expand = c(0, 0)) +
   scale_y_continuous(name = "E(D | D ≥ l)",

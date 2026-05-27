@@ -1251,17 +1251,12 @@ Three steps:
 \begin{enumerate}\setlength\itemsep{0.25em}\footnotesize
   \item Center the outcome: \;$\Delta\tilde Y_i = \Delta Y_i - \widehat m(0)$, \;where $\widehat m(0)$ is the average $\Delta Y$ for untreated units.
   \item Regress $\Delta\tilde Y_i$ on the B-spline basis $\psi(D_i)$, \;using only treated units ($D_i > 0$).
-  \item Bootstrap for pointwise confidence bands.
+  \begin{itemize}\setlength\itemsep{0.1em}
+    \item The ``B'' is for \textbf{basis}: \;$\psi(d) = (\psi_1(d), \ldots, \psi_K(d))$ is $K$ basis functions built from the knots.
+    \item Knots set the structure; the basis is the columns you regress on (\texttt{mkspline} in Stata).
+  \end{itemize}
+  \item Bootstrap for pointwise confidence bands on the fitted $\widehat{\text{ATT}}(d \mid d)$ curve.
 \end{enumerate}
-
-\vspace{0.3em}
-{\footnotesize\color{slate}\itshape
-The ``B'' is for \textbf{basis}: $\psi(d) = (\psi_1(d), \ldots, \psi_K(d))$ is a bag of $K$ basis functions built from the knots. \;Knots set the structure; the basis is what you regress on (\texttt{mkspline} in Stata).}
-
-\vspace{0.2em}
-\begin{center}
-\highlight{Returns $\widehat{\text{ATT}}(d \mid d)$ as a continuous function, with SEs at every $d$.}
-\end{center}
 \end{frame}
 
 %% ---------- Assumptions ----------

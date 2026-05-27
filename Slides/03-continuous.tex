@@ -27,6 +27,17 @@
   morecomment=[l]{\#},
   morestring=[b]",
 }
+\lstdefinelanguage{Stata}{
+  morekeywords={use, gen, replace, reg, predict, twoway, scatter, line,
+                mkspline, sort, label, variable, summarize, quietly, capture,
+                drop, keep, merge, append, forvalues, foreach, local, global,
+                set, clear, sysuse, preserve, restore, display, di, by, bysort,
+                xi, areg, xtreg, ivregress, reghdfe, xtset, tsset, encode},
+  sensitive=false,
+  morecomment=[l]{*},
+  morecomment=[l]{//},
+  morestring=[b]",
+}
 \lstset{
   basicstyle=\ttfamily\footnotesize,
   keywordstyle=\color{remixgreendark}\bfseries,
@@ -919,6 +930,74 @@ Each treated dose-group's DiD versus the never-treated: $\widehat{\text{ATT}}(1 
 
 \remixsection{Part 3: \\ Estimation}
 
+%% ---------- Backwards vs. Forwards engineering ----------
+\begin{frame}{Backwards engineering vs.\ Forwards engineering}
+\vspace{0.1em}
+
+\begin{columns}[T]
+
+\begin{column}{0.46\textwidth}
+\textbf{\color{red!70!black}Backwards engineering}
+\vspace{0.2em}
+\begin{itemize}\setlength\itemsep{1pt}\footnotesize
+  \item Run TWFE (or OLS) of $\Delta Y_i$ on $D_i$.
+  \item FWL: the coefficient is a weighted average of dose-specific treatment effects.
+  \item Weights come from the variance of $D$ conditional on controls.
+  \item Some weights are \textbf{negative}; they vary across the dose distribution.
+  \item No recognizable causal parameter in sight.
+\end{itemize}
+\end{column}
+
+\begin{column}{0.06\textwidth}
+\begin{center}
+\vspace{2.5em}
+\color{warmgray}\Large$\to$
+\end{center}
+\end{column}
+
+\begin{column}{0.47\textwidth}
+\textbf{\color{remixgreendark}Forwards engineering}
+\vspace{0.2em}
+\begin{itemize}\setlength\itemsep{1pt}\footnotesize
+  \item Name the target: $\text{ATT}(d \mid d)$ or $\text{ACRT}(d)$.
+  \item State assumptions you are willing to defend.
+  \item Build an estimator that is right on average if those assumptions hold --- and has low variance.
+  \item The estimator's meaning is known \textit{before} you run it.
+\end{itemize}
+\end{column}
+
+\end{columns}
+
+\vspace{0.3em}
+\begin{center}
+\highlight{CBS is forwards engineering. \;TWFE with continuous $D$ is backwards.}
+\end{center}
+\end{frame}
+
+%% ---------- Guido on LATE ----------
+\begin{frame}{Guido Imbens on this distinction}
+\vspace{0.3em}
+
+Imbens makes this point about IV and LATE (1994): \textbf{start with the parameter, then build the estimator.}
+
+\vspace{0.5em}
+
+\begin{itemize}\setlength\itemsep{6pt}
+  \item IV with a binary instrument identifies the LATE --- the average effect for compliers.
+  \item That is a \textit{well-defined} causal parameter for a \textit{well-defined} subpopulation.
+  \item The alternative --- ``2SLS coefficient = something'' --- is backwards engineering. \;It works when effects are homogeneous; it obscures when they are not.
+  \item The same logic applies here: with continuous $D$, commit to $\text{ATT}(d \mid d)$, then estimate it.
+\end{itemize}
+
+\vspace{0.6em}
+\begin{center}
+{\small\color{warmgray}
+\href{https://www.youtube.com/watch?v=QnwTdd-7BvY}%
+{\texttt{youtube.com/watch?v=QnwTdd-7BvY}}
+\quad --- \quad Guido Imbens on IV and LATE (MHE lecture series)}
+\end{center}
+\end{frame}
+
 \begin{frame}{Three estimation options for ATT($d \mid d$)}
 \vspace{0.2cm}
 
@@ -1013,24 +1092,57 @@ If bins of width $h$ work, why not let $h \to 0$ and recover a curve?
 \end{frame}
 
 %% ---------- Splines ----------
-\begin{frame}{Splines: smooth piecewise polynomials}
-\vspace{0.5em}
 
-A spline is a curve made of low-degree polynomial pieces joined smoothly at \textbf{knot} points.
-
-\vspace{0.9em}
-
-\textbf{Cubic B-splines} (the standard):
-\begin{itemize}\setlength\itemsep{0.3em}
-  \item Each piece is a cubic. \;Pieces meet with continuous first and second derivatives.
-  \item Place knots at sample quantiles of $D$ --- resolution where the data is.
-  \item Number of knots controls smoothness: few knots = smooth, many knots = wiggly.
-  \item Fit by OLS on the basis vector $\psi(D_i) = (\psi_1(D_i), \ldots, \psi_K(D_i))$.
-\end{itemize}
-
-\vspace{0.6em}
+%% Slide 1: visual — what are pieces?
+\begin{frame}{Splines: the curve is made of pieces}
+\vspace{0.1cm}
 \begin{center}
-\highlight{Smooth, differentiable, far fewer parameters than fine bins.}
+\includegraphics[width=0.84\textwidth,height=0.68\textheight,keepaspectratio]{figures/dxt/spline_pieces.pdf}
+\end{center}
+\vspace{-0.2cm}
+\begin{center}
+\footnotesize\color{warmgray}\itshape
+3 knots divide the dose range into 4 regions. Inside each region: one cubic polynomial. \\
+The curve is forced to match in value, slope, and curvature at every knot.
+\end{center}
+\end{frame}
+
+%% Slide 2: Stata code
+\begin{frame}[fragile]{Fitting a spline in Stata: \texttt{mkspline}}
+
+\texttt{mkspline} generates the basis columns; \texttt{reg} does the rest.
+
+\vspace{0.3em}
+
+\begin{lstlisting}[language=Stata,basicstyle=\ttfamily\footnotesize]
+* 1. Make the basis  (4 quantile knots = 3 interior knots = 4 pieces)
+mkspline spl = dose, nknots(4) cubic displayknots
+
+* 2. Regress the first-differenced outcome on the basis
+reg delta_y spl*
+
+* 3. Fitted values and plot
+predict yhat, xb
+twoway (scatter delta_y dose, mcolor(gs10) msize(small)) ///
+       (line yhat dose, sort lcolor(navy) lwidth(medthick)), ///
+       xtitle("Dose") ytitle("First difference") legend(off)
+\end{lstlisting}
+
+\vspace{0.15em}
+\meta{\texttt{nknots(4)} places knots at dose quantiles. \;\texttt{displayknots} prints their values so you can report them.}
+\end{frame}
+
+%% Slide 3: what the fitted values look like
+\begin{frame}{What the spline estimates}
+\vspace{0.1cm}
+\begin{center}
+\includegraphics[width=0.84\textwidth,height=0.68\textheight,keepaspectratio]{figures/dxt/spline_fitted.pdf}
+\end{center}
+\vspace{-0.2cm}
+\begin{center}
+\footnotesize\color{warmgray}\itshape
+The \texttt{predict yhat} line from the regression above. One smooth curve through the scatter. \\
+Pointwise confidence band from \texttt{predict se, stdp} and \texttt{twoway rarea}.
 \end{center}
 \end{frame}
 

@@ -13,6 +13,7 @@
 * Companion script: twfe_reconstruction.R
 * %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+cd "/Users/scunning/Codechella-Madrid/Labs/China-WTO"
 clear all
 use "data/industry_by_year.dta", clear
 

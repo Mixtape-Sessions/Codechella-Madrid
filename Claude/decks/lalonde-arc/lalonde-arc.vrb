@@ -1,0 +1,11 @@
+\frametitle{Five lines of R get you to \$1{,}642}
+\begin{lstlisting}
+ps_mod <- glm(treat ~ age + I(age^2) + educ + black + hisp +
+              marr + nodegree + re74 + re75 + I(re74^2) + I(re75^2),
+              data=cps, family=binomial)
+cps$ps <- predict(ps_mod, type="response")
+cs <- subset(cps, ps>0.01 & ps<0.99)
+cs$dY <- cs$re78 - cs$re75
+abadie_att <- mean( ((cs$treat - cs$ps)/(1 - cs$ps)) * cs$dY ) / mean(cs$treat)
+#> $1,642
+\end{lstlisting}

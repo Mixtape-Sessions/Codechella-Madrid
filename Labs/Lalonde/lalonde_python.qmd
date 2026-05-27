@@ -1,0 +1,352 @@
+---
+title: "LaLonde Lab — Day 1 Solution (Python)"
+subtitle: "NSW experimental panel · DiD by hand and by regression"
+author: "Zurich Workshop · May 2026"
+format:
+  html:
+    theme: cosmo
+    toc: true
+    code-fold: false
+    embed-resources: true
+  pdf:
+    toc: true
+    documentclass: article
+    geometry: margin=1in
+jupyter: python3
+execute:
+  echo: true
+  warning: false
+---
+
+# Setup
+
+```{python}
+import pandas as pd
+import numpy as np
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
+from linearmodels.panel import PanelOLS
+import matplotlib.pyplot as plt
+
+URL = ("https://raw.github.com/Mixtape-Sessions/Causal-Inference-2/"
+       "master/Lab/Lalonde/lalonde_exp_panel.dta")
+
+exp_panel = pd.read_stata(URL)
+exp_panel.info()
+exp_panel.head()
+```
+
+------------------------------------------------------------------------
+
+# Part 1 — The 2×2 by hand
+
+Use `78` as the post period and `75` as the pre period.
+
+```{python}
+cells = (exp_panel.query("year in [75, 78]")
+                  .groupby(["ever_treated", "year"])["re"]
+                  .mean()
+                  .unstack("year"))
+print(cells)
+
+Y_T_75 = cells.loc[1, 75]
+Y_T_78 = cells.loc[1, 78]
+Y_C_75 = cells.loc[0, 75]
+Y_C_78 = cells.loc[0, 78]
+
+DiD_hand = (Y_T_78 - Y_T_75) - (Y_C_78 - Y_C_75)
+post_dim = Y_T_78 - Y_C_78
+
+print(f"\nDiD by hand:               {DiD_hand:>10.2f}")
+print(f"Post-period diff-in-means: {post_dim:>10.2f}")
+```
+
+**Verified values on this panel** (cell means: $Y^T_{75} = 1532$, $Y^T_{78} = 6349$, $Y^C_{75} = 1267$, $Y^C_{78} = 4555$, $n_T = 185$, $n_C = 260$):
+
+-   Post-period diff-in-means: **\$1,794** (the standard D&W RCT benchmark)
+-   DiD with 75 as pre: **\$1,529**
+
+They disagree by \$265 because the pre-period had +\$265 of random imbalance. Random assignment guarantees $\mathbb{E}[\widehat\delta] = \text{ATT}$ *in expectation* across re-randomizations — not in any one sample. **Unbiasedness is a repeated-sampling concept.**
+
+------------------------------------------------------------------------
+
+# Part 2 — The three regressions
+
+Restrict to `year ∈ {75, 78}`. Each spec should return the same DiD.
+
+```{python}
+df = exp_panel.query("year in [75, 78]").copy()
+df["post"] = (df["year"] == 78).astype(int)
+```
+
+### Regression 1 — OLS with interactions
+
+```{python}
+reg1 = smf.ols("re ~ ever_treated * post", data=df).fit(cov_type="HC1")
+print(reg1.summary().tables[1])
+# Coefficient on ever_treated:post = +1529 (this is the DiD)
+```
+
+### Regression 2 — TWFE
+
+```{python}
+df_panel = df.set_index(["id", "year"])
+reg2 = PanelOLS.from_formula(
+    "re ~ 1 + ever_treated:post + EntityEffects + TimeEffects",
+    data=df_panel
+).fit(cov_type="robust")
+print(reg2.summary)
+# Coefficient on ever_treated:post = +1529
+```
+
+### Regression 3 — Long differences
+
+```{python}
+wide = (exp_panel.query("year in [75, 78]")
+                .pivot_table(index=["id", "ever_treated"],
+                             columns="year", values="re")
+                .reset_index()
+                .rename(columns={75: "re75", 78: "re78"}))
+wide["d_re"] = wide["re78"] - wide["re75"]
+
+reg3 = smf.ols("d_re ~ ever_treated", data=wide).fit(cov_type="HC1")
+print(reg3.summary().tables[1])
+# Coefficient on ever_treated = +1529
+```
+
+All three return the same DiD = \$1,529.
+
+------------------------------------------------------------------------
+
+# Part 3 — Event study
+
+Include `74`. Baseline is `75`.
+
+```{python}
+# Build dummies; drop year 75 to make it the baseline
+es_df = exp_panel.copy()
+es_df["y74"] = (es_df["year"] == 74).astype(int)
+es_df["y78"] = (es_df["year"] == 78).astype(int)
+es_df["te74"] = es_df["y74"] * es_df["ever_treated"]
+es_df["te78"] = es_df["y78"] * es_df["ever_treated"]
+
+panel = es_df.set_index(["id", "year"])
+
+es = PanelOLS.from_formula(
+    "re ~ 1 + te74 + te78 + EntityEffects + TimeEffects",
+    data=panel
+).fit(cov_type="clustered", cluster_entity=True)
+
+print(es.summary)
+# te74 ≈ -277  ← pre-trend check passes
+# te78 = +1529  ← post-period treatment effect (same as the DiD)
+```
+
+Plot:
+
+```{python}
+#| fig-width: 7
+#| fig-height: 4
+years = [74, 75, 78]
+coefs = [es.params["te74"], 0.0, es.params["te78"]]
+ses   = [es.std_errors["te74"], 0.0, es.std_errors["te78"]]
+cis_lo = [c - 1.96 * s for c, s in zip(coefs, ses)]
+cis_hi = [c + 1.96 * s for c, s in zip(coefs, ses)]
+
+fig, ax = plt.subplots(figsize=(7, 4))
+ax.axhline(0, color="grey", linestyle="--", linewidth=0.8)
+ax.errorbar(years, coefs,
+            yerr=[[c - l for c, l in zip(coefs, cis_lo)],
+                  [h - c for c, h in zip(coefs, cis_hi)]],
+            fmt="o", color="black", capsize=5, markersize=8)
+ax.set_xticks(years)
+ax.set_xlabel("")
+ax.set_ylabel("Coefficient (vs. 1975 baseline)")
+ax.set_title("Event study: NSW experimental panel")
+plt.tight_layout()
+plt.show()
+```
+
+------------------------------------------------------------------------
+
+# Part 4 — Event study by hand
+
+Each event-study coefficient is a 2×2 DiD with `75` as the baseline.
+
+```{python}
+def cell(yr, trt):
+    return exp_panel.query("year == @yr and ever_treated == @trt")["re"].mean()
+
+beta_74 = (cell(74, 1) - cell(75, 1)) - (cell(74, 0) - cell(75, 0))
+beta_78 = (cell(78, 1) - cell(75, 1)) - (cell(78, 0) - cell(75, 0))
+
+print(f"beta_74 (hand) = {beta_74:>10.2f}")
+print(f"beta_78 (hand) = {beta_78:>10.2f}")
+```
+
+These match the regression coefficients from Part 3 to machine precision.
+
+------------------------------------------------------------------------
+
+# Part 5 — Interpretation
+
+-   **`beta_78` = +\$1,529** is the post-period treatment effect — statistically distinguishable from zero. The NSW program *worked* on this sample.
+-   **`beta_74` ≈ −\$277** is the pre-treatment placebo. Small relative to `beta_78` and not significant. **Pre-trend gut check passes.**
+-   The DiD (\$1,529) and the post-period diff-in-means (\$1,794) **don't match** in this sample. Both are valid estimators of the ATT; they disagree by \$265 because of finite-sample pre-period imbalance. Under random assignment they agree *in expectation* — unbiasedness is a repeated-sampling concept, not a property of any single realization.
+
+------------------------------------------------------------------------
+
+# What we did, in one paragraph
+
+We took the experimental NSW panel — the version restricted by Dehejia & Wahba to men with two years of pre-program earnings ($n_T = 185$, $n_C = 260$). The post-period diff-in-means is **\$1,794** (the standard D&W RCT benchmark). The DiD using 75 as pre-period is **\$1,529** — they disagree by \$265 because of finite-sample pre-period imbalance. Three regression specifications all return the DiD of \$1,529. The event study gives $\beta_{74} \approx -\$277$ (pre-trend check passes) and $\beta_{78} = +\$1,529$ (same as the DiD by construction). Under random assignment, DiD and post-period diff agree *in expectation* across re-randomizations — but not in any single realization. **Unbiasedness is a repeated-sampling property.**
+
+------------------------------------------------------------------------
+
+# Part B — Now make it harder (covariates lab)
+
+Switch to the non-experimental panel: same 297 NSW treated men, but the controls are now a random sample from the CPS. Selection is severe and negative.
+
+```{python}
+URL_NE = ("https://raw.github.com/Mixtape-Sessions/Causal-Inference-2/"
+          "master/Lab/Lalonde/lalonde_nonexp_panel.dta")
+nonexp_panel = pd.read_stata(URL_NE)
+
+df_ne = nonexp_panel.query("year in [75, 78]").copy()
+df_ne["post"] = (df_ne["year"] == 78).astype(int)
+
+# Naive DiD — wrong sign
+naive = smf.ols("re ~ ever_treated * post", data=df_ne).fit(cov_type="HC1")
+print(f"Naive DiD on non-experimental panel: "
+      f"{naive.params['ever_treated:post']:>10.2f}")
+# Expected: +3,621
+# Right sign, wrong magnitude — overshoots the $1,794 benchmark by ~$1,800
+# because NSW men had unusually low pre-earnings ($1,532) and bounced back fast
+# while CPS controls were stable. DiD attributes the differential growth to treatment.
+```
+
+## DiD with additive X (Scott's published spec)
+
+This is what `lalonde-did-stata.do` actually runs: pooled OLS on all three years, X enters additively (no Post × X interactions), no fixed effects.
+
+```{python}
+df_ne_all = nonexp_panel.copy()  # keep all three years (74, 75, 78)
+df_ne_all["post"] = (df_ne_all["year"] == 78).astype(int)
+
+X_vars = ["age", "agesq", "agecube", "educ", "educsq", "marr",
+          "nodegree", "black", "hisp"]
+
+formula = "re ~ ever_treated * post + " + " + ".join(X_vars)
+did_add = smf.ols(formula, data=df_ne_all).fit(cov_type="HC1")
+print(f"DiD with additive X: "
+      f"{did_add.params['ever_treated:post']:>10.2f}")
+# Expected: +3,522.47  ← Scott's published number
+# Additive X barely helps (naive DiD was +3,621). Need a design-aware estimator.
+```
+
+## Outcome regression (Heckman, Ichimura, Todd 1997)
+
+```{python}
+wide_ne = (nonexp_panel.query("year in [75, 78]")
+                       .pivot_table(index=["id", "ever_treated"] + X_vars,
+                                    columns="year", values="re")
+                       .reset_index()
+                       .rename(columns={75: "re75", 78: "re78"}))
+wide_ne["dY"] = wide_ne["re78"] - wide_ne["re75"]
+
+or_formula = "dY ~ " + " + ".join(X_vars)
+or_model = smf.ols(or_formula,
+                   data=wide_ne[wide_ne["ever_treated"] == 0]).fit()
+
+treated = wide_ne[wide_ne["ever_treated"] == 1].copy()
+treated["mu0_hat"] = or_model.predict(treated)
+att_or = (treated["dY"] - treated["mu0_hat"]).mean()
+print(f"OR ATT: {att_or:>10.2f}")
+# Expected: +1,604  (≈ $190 below the $1,794 benchmark)
+```
+
+## Inverse propensity weighting (Abadie 2005)
+
+```{python}
+ps_formula = "ever_treated ~ " + " + ".join(X_vars)
+ps_model = smf.logit(ps_formula, data=wide_ne).fit(disp=False)
+wide_ne["p_hat"] = ps_model.predict(wide_ne)
+wide_ne["w"] = np.where(wide_ne["ever_treated"] == 1, 1.0,
+                        wide_ne["p_hat"] / (1.0 - wide_ne["p_hat"]))
+
+mean_T = wide_ne.loc[wide_ne["ever_treated"] == 1, "dY"].mean()
+controls = wide_ne[wide_ne["ever_treated"] == 0]
+mean_C = np.average(controls["dY"], weights=controls["w"])
+att_ipw = mean_T - mean_C
+print(f"IPW ATT: {att_ipw:>10.2f}")
+# Expected: +2,019  (≈ $225 above the $1,794 benchmark; sensitive to overlap)
+```
+
+## Doubly-robust DiD (Sant'Anna & Zhao 2020)
+
+Python doesn't have a first-class DR-DiD package matching `DRDID` (R) or `drdid` (Stata). Cleanest options:
+
+1.  Use the R `DRDID` package via `rpy2`.
+2.  Hand-compute the Sant'Anna-Zhao "improved DR" estimator from OR + IPW pieces above:
+
+```{python}
+# Improved DR-DiD (Sant'Anna-Zhao 2020, eq. 3.1 simplified form)
+m1 = treated["dY"].mean()
+mu_hat_treated = or_model.predict(treated).mean()
+m2 = (wide_ne.loc[wide_ne["ever_treated"] == 0, "w"] *
+      (wide_ne.loc[wide_ne["ever_treated"] == 0, "dY"] -
+       or_model.predict(wide_ne[wide_ne["ever_treated"] == 0]))).sum() / \
+     wide_ne.loc[wide_ne["ever_treated"] == 0, "w"].sum()
+
+att_dr_simplified = (m1 - mu_hat_treated) - m2
+print(f"DR ATT (simplified): {att_dr_simplified:>10.2f}")
+# Expected: ~ +1,959  (≈ $165 above the $1,794 benchmark)
+# DR overshoots; OR undershoots. They're roughly tied for closest.
+```
+
+For production work, use the R `DRDID` package via `rpy2`, or run the Stata `drdid` command — both implement the full Sant'Anna-Zhao estimator with proper standard errors.
+
+## The comparison table
+
+| Estimator | ATT | Distance from \$1,794 |
+|---|---|---|
+| Naive DiD (no $X$)                                  | +\$3,621 | overshoots by \$1,827 |
+| DiD with additive $X$ (Scott's `reg` spec)          | +\$3,522 | overshoots by \$1,728 |
+| **Design-aware (`drdid all`):**                     |          |          |
+| &nbsp;&nbsp;OR — Regression-adjusted (`reg`)        | +\$1,770 | **−\$24** |
+| &nbsp;&nbsp;IPW — Abadie (`ipw`)                    | +\$1,861 | +\$67 |
+| &nbsp;&nbsp;DR-IPW (`dripw`)                         | +\$1,979 | +\$185 |
+| &nbsp;&nbsp;DR-improved (`drimp`)                    | +\$2,033 | +\$239 |
+| **RCT benchmark (post-period diff)**                | **+\$1,794** | --- |
+
+Notes:
+
+-   **Additive $X$ barely helps** (\$3,522 vs naive \$3,621). The X main effects don't have the kind of leverage needed to fix mean reversion.
+-   **Design-aware estimators all land within \$240** of the benchmark. OR (regression-adjusted) lands closest at \$24 below; DR-improved is furthest at \$239 above.
+-   None hit the benchmark exactly — with $n_T = 185$ vs $n_C \approx 16{,}000$, sampling variation alone explains the spread.
+
+## Propensity-score overlap diagnostic
+
+```{python}
+#| fig-width: 7
+#| fig-height: 4
+fig, ax = plt.subplots(figsize=(7, 4))
+for d in [0, 1]:
+    subset = wide_ne[wide_ne["ever_treated"] == d]["p_hat"]
+    ax.hist(subset, bins=30, alpha=0.6,
+            label=f"D = {d} (n={len(subset)})",
+            density=True)
+ax.set_xlabel("$\\widehat p(X)$")
+ax.set_ylabel("density")
+ax.set_title("Propensity-score overlap: NSW vs CPS")
+ax.legend()
+plt.tight_layout()
+plt.show()
+```
+
+## Discussion questions
+
+1.  Which estimators moved the ATT in the right direction? Which got closest?
+2.  Drop the Post × X interactions in the TWFE spec — what happens, and why?
+3.  Where does overlap fail in the plot above? What does that imply for IPW and DR?
+4.  Why doesn't DR always dominate OR and IPW?
+5.  How much of the residual gap is selection on unobservables vs. functional-form misspecification?

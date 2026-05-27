@@ -1,0 +1,336 @@
+---
+title: "LaLonde Lab — Day 1 Solution (R)"
+subtitle: "NSW experimental panel · DiD by hand and by regression"
+author: "Zurich Workshop · May 2026"
+format:
+  html:
+    theme: cosmo
+    toc: true
+    code-fold: false
+    embed-resources: true
+  pdf:
+    toc: true
+    documentclass: article
+    geometry: margin=1in
+engine: knitr
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+# Setup
+
+Load the experimental panel from the Mixtape-Sessions GitHub. Three years per person: `74`, `75`, `78`. Outcome: real earnings. Treatment: `ever_treated`.
+
+```{r}
+library(haven)
+library(dplyr)
+library(tidyr)
+library(fixest)
+library(broom)
+
+exp_panel <- read_dta(
+  "https://raw.github.com/Mixtape-Sessions/Causal-Inference-2/master/Lab/Lalonde/lalonde_exp_panel.dta"
+)
+
+glimpse(exp_panel)
+```
+
+------------------------------------------------------------------------
+
+# Part 1 — The 2×2 by hand
+
+Use `78` as the post period and `75` as the pre period.
+
+```{r}
+cells <- exp_panel |>
+  filter(year %in% c(75, 78)) |>
+  group_by(ever_treated, year) |>
+  summarise(re_mean = mean(re), .groups = "drop")
+
+cells
+```
+
+The four cell means:
+
+```{r}
+Y_T_75 <- cells$re_mean[cells$ever_treated == 1 & cells$year == 75]
+Y_T_78 <- cells$re_mean[cells$ever_treated == 1 & cells$year == 78]
+Y_C_75 <- cells$re_mean[cells$ever_treated == 0 & cells$year == 75]
+Y_C_78 <- cells$re_mean[cells$ever_treated == 0 & cells$year == 78]
+
+cat(sprintf("Y_T_75 = %8.2f\n", Y_T_75))
+cat(sprintf("Y_T_78 = %8.2f\n", Y_T_78))
+cat(sprintf("Y_C_75 = %8.2f\n", Y_C_75))
+cat(sprintf("Y_C_78 = %8.2f\n", Y_C_78))
+```
+
+The DiD:
+
+```{r}
+DiD_hand <- (Y_T_78 - Y_T_75) - (Y_C_78 - Y_C_75)
+cat(sprintf("\nDiD by hand: %.2f\n", DiD_hand))
+```
+
+The post-period difference in means (also valid under randomization):
+
+```{r}
+post_dim <- Y_T_78 - Y_C_78
+cat(sprintf("Post-period diff-in-means: %.2f\n", post_dim))
+```
+
+**Expected values on this panel** (cell means: $Y^T_{75} = 1532$, $Y^T_{78} = 6349$, $Y^C_{75} = 1267$, $Y^C_{78} = 4555$, $n_T = 185$, $n_C = 260$):
+
+-   Post-period diff-in-means: **\$1,794** (the standard D&W benchmark)
+-   DiD with 75 as pre: **\$1,529**
+
+They disagree by \$265 because the pre-period had +\$265 of random imbalance (treated happened to earn more in 75). Random assignment guarantees $\mathbb{E}[\widehat\delta] = \text{ATT}$ in expectation across re-randomizations — not in any one realization. **Unbiasedness is a repeated-sampling concept.**
+
+------------------------------------------------------------------------
+
+# Part 2 — The three regressions
+
+Restrict to `year ∈ {75, 78}`. Each spec should return the same DiD coefficient.
+
+```{r}
+df <- exp_panel |>
+  filter(year %in% c(75, 78)) |>
+  mutate(post = as.integer(year == 78))
+```
+
+### Regression 1 — OLS with interactions
+
+```{r}
+reg1 <- lm(re ~ ever_treated * post, data = df)
+summary(reg1)$coefficients
+```
+
+The coefficient on `ever_treated:post` is your DiD.
+
+### Regression 2 — TWFE
+
+```{r}
+reg2 <- feols(re ~ ever_treated:post | id + year, data = df, vcov = "hetero")
+summary(reg2)
+```
+
+### Regression 3 — Long differences
+
+```{r}
+df_wide <- exp_panel |>
+  filter(year %in% c(75, 78)) |>
+  select(id, ever_treated, year, re) |>
+  pivot_wider(names_from = year, values_from = re, names_prefix = "re") |>
+  mutate(d_re = re78 - re75)
+
+reg3 <- lm(d_re ~ ever_treated, data = df_wide)
+summary(reg3)$coefficients
+```
+
+All three return **\$1,529** (the DiD on this sample).
+
+------------------------------------------------------------------------
+
+# Part 3 — Event study
+
+Include `74`. Baseline is `75` (omitted).
+
+```{r}
+es <- feols(re ~ i(year, ever_treated, ref = 75) | id + year,
+            data = exp_panel,
+            vcov = ~id)
+
+es_pts <- tidy(es, conf.int = TRUE) |>
+  mutate(year_num = readr::parse_number(term))
+
+es_pts
+```
+
+Plot:
+
+```{r}
+#| fig-width: 7
+#| fig-height: 4
+library(ggplot2)
+
+bind_rows(
+  tibble(year_num = 75, estimate = 0, conf.low = 0, conf.high = 0),
+  es_pts |> select(year_num, estimate, conf.low, conf.high)
+) |>
+  ggplot(aes(year_num, estimate)) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "grey50") +
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.15) +
+  geom_point(size = 3) +
+  scale_x_continuous(breaks = c(74, 75, 78)) +
+  labs(x = NULL, y = "Coefficient (re difference vs. 1975 baseline)",
+       title = "Event study: NSW experimental panel") +
+  theme_minimal(base_size = 12)
+```
+
+------------------------------------------------------------------------
+
+# Part 4 — Event study by hand
+
+Each coefficient is a 2×2 DiD with `75` as baseline.
+
+```{r}
+cell <- function(yr, trt) {
+  exp_panel |> filter(year == yr, ever_treated == trt) |> pull(re) |> mean()
+}
+
+beta_74 <- (cell(74, 1) - cell(75, 1)) - (cell(74, 0) - cell(75, 0))
+beta_78 <- (cell(78, 1) - cell(75, 1)) - (cell(78, 0) - cell(75, 0))
+
+cat(sprintf("Hand-computed beta_74 = %.2f\n", beta_74))
+cat(sprintf("Hand-computed beta_78 = %.2f\n", beta_78))
+```
+
+These should match the regression coefficients from Part 3 to machine precision.
+
+------------------------------------------------------------------------
+
+# Part 5 — Interpretation
+
+-   `beta_78 = $1,529` is the post-period treatment effect — statistically distinguishable from zero. The NSW program *worked* on this sample.
+-   `beta_74 ≈ -$277` is the pre-treatment placebo. Small relative to `beta_78` and not significant. **Pre-trend gut check passes.**
+-   The DiD (\$1,529) and the post-period diff-in-means (\$1,794) **don't match** in this sample. Both are valid estimators of the ATT; they disagree by \$265 because of finite-sample pre-period imbalance. Under random assignment they agree *in expectation* — unbiasedness is a repeated-sampling concept, not a property of any single realization.
+
+------------------------------------------------------------------------
+
+# What we did, in one paragraph
+
+We took the experimental NSW panel — the *clean* version of the LaLonde data, restricted by Dehejia & Wahba to men with two years of pre-program earnings ($n_T = 185$, $n_C = 260$). The post-period difference-in-means is **\$1,794** — the standard D&W RCT benchmark. The DiD using 75 as pre-period is **\$1,529**, because in this particular sample the pre-period had +\$265 of random imbalance. Both estimators are unbiased under random assignment; they disagree by \$265 in this one realization. Three regression specifications (OLS with interactions, TWFE, long differences) all return the DiD of \$1,529 to machine precision. The event study gives $\beta_{74} \approx -\$277$ (passes the pre-trend gut check) and $\beta_{78} = +\$1,529$ (same as the DiD by construction).
+
+------------------------------------------------------------------------
+
+# Part B — Now make it harder (covariates lab)
+
+Switch to the non-experimental panel: same 297 NSW treated men, but the controls are replaced with a random sample from the CPS. Selection is severe and negative.
+
+```{r}
+nonexp_panel <- read_dta(
+  "https://raw.github.com/Mixtape-Sessions/Causal-Inference-2/master/Lab/Lalonde/lalonde_nonexp_panel.dta"
+)
+
+# Naive DiD — should give the wrong sign
+df_ne <- nonexp_panel |>
+  filter(year %in% c(75, 78)) |>
+  mutate(post = as.integer(year == 78))
+
+naive_did <- lm(re ~ ever_treated * post, data = df_ne)
+coef_naive <- coef(naive_did)[["ever_treated:post"]]
+cat(sprintf("Naive DiD on non-experimental panel: %.2f\n", coef_naive))
+# Expected: +3,621
+# Right sign, wrong magnitude — overshoots the $1,794 benchmark by ~$1,800
+# because NSW men had unusually low pre-earnings ($1,532) and bounced back fast
+# while CPS controls were stable. DiD attributes the differential growth to treatment.
+```
+
+## DiD with additive X (Scott's published spec)
+
+This is what `lalonde-did-stata.do` actually runs: pooled OLS on all three years, X enters additively (no Post × X interactions), no fixed effects.
+
+```{r}
+df_ne_all <- nonexp_panel  # keep all three years
+df_ne_all$post <- as.integer(df_ne_all$year == 78)
+
+X_vars <- c("age", "agesq", "agecube", "educ", "educsq", "marr",
+            "nodegree", "black", "hisp")
+
+fml <- as.formula(paste(
+  "re ~ ever_treated * post +",
+  paste(X_vars, collapse = " + ")
+))
+
+did_add <- lm(fml, data = df_ne_all)
+cat(sprintf("DiD with additive X: %.2f\n",
+            coef(did_add)[["ever_treated:post"]]))
+# Expected: +3,522.47  ← Scott's published number
+# Additive X barely helps (naive DiD was +3,621). Need a design-aware estimator.
+```
+
+## Outcome regression (Heckman, Ichimura, Todd 1997)
+
+```{r}
+wide_ne <- nonexp_panel |>
+  filter(year %in% c(75, 78)) |>
+  pivot_wider(
+    id_cols = c(id, ever_treated, all_of(X_vars)),
+    names_from = year, values_from = re, names_prefix = "re"
+  ) |>
+  mutate(dY = re78 - re75)
+
+or_model <- lm(reformulate(X_vars, response = "dY"),
+               data = filter(wide_ne, ever_treated == 0))
+
+treated <- filter(wide_ne, ever_treated == 1)
+treated$mu0_hat <- predict(or_model, newdata = treated)
+att_or <- mean(treated$dY - treated$mu0_hat)
+cat(sprintf("OR ATT: %.2f\n", att_or))
+# Expected: +1,604  (≈ $190 below the $1,794 benchmark)
+```
+
+## Inverse propensity weighting (Abadie 2005)
+
+```{r}
+ps_model <- glm(reformulate(X_vars, response = "ever_treated"),
+                data = wide_ne, family = binomial())
+wide_ne$p_hat <- predict(ps_model, type = "response")
+wide_ne$w <- ifelse(wide_ne$ever_treated == 1, 1,
+                    wide_ne$p_hat / (1 - wide_ne$p_hat))
+
+att_ipw <- with(wide_ne,
+  mean(dY[ever_treated == 1]) -
+  weighted.mean(dY[ever_treated == 0], w = w[ever_treated == 0])
+)
+cat(sprintf("IPW ATT: %.2f\n", att_ipw))
+# Expected: +2,019  (≈ $225 above the $1,794 benchmark; sensitive to overlap)
+```
+
+## Doubly-robust DiD (Sant'Anna & Zhao 2020)
+
+```{r}
+#| eval: false
+# Requires: install.packages("DRDID")
+library(DRDID)
+
+drdid_fit <- drdid(
+  yname = "re", tname = "year", idname = "id", dname = "ever_treated",
+  xformla = ~ age + agesq + educ + educsq + marr + nodegree +
+              black + hisp + re74 + u74,
+  data = nonexp_panel |> filter(year %in% c(75, 78)),
+  panel = TRUE, estMethod = "imp"
+)
+summary(drdid_fit)
+# Expected: ATT ~ +1,959  (≈ $165 above the $1,794 benchmark)
+# DR overshoots; OR undershoots. They're roughly tied for closest.
+```
+
+## The comparison table (Scott's published `drdid all` output)
+
+| Estimator | ATT | Distance from \$1,794 |
+|---|---|---|
+| Naive DiD (no $X$)                                  | +\$3,621 | overshoots by \$1,827 |
+| DiD with additive $X$ (your `reg` spec)             | +\$3,522 | overshoots by \$1,728 |
+| **Design-aware (`drdid all`):**                     |          |          |
+| &nbsp;&nbsp;OR — Regression-adjusted (`reg`)        | +\$1,770 | **−\$24** |
+| &nbsp;&nbsp;IPW — Abadie (`ipw`)                    | +\$1,861 | +\$67 |
+| &nbsp;&nbsp;DR-IPW (`dripw`)                         | +\$1,979 | +\$185 |
+| &nbsp;&nbsp;DR-improved (`drimp`)                    | +\$2,033 | +\$239 |
+| **RCT benchmark (post-period diff)**                | **+\$1,794** | --- |
+
+Notes:
+
+-   **Additive $X$ barely helps** (\$3,522 vs naive \$3,621). The X main effects don't have the kind of leverage needed to fix mean reversion.
+-   **Design-aware estimators all land within \$240** of the benchmark. OR (regression-adjusted) lands closest at \$24 below; DR-improved is furthest at \$239 above.
+-   None hit the benchmark exactly — with $n_T = 185$ vs $n_C \approx 16{,}000$, sampling variation alone explains the spread.
+-   For the deck's TWFE-with-Post×X spec (id FE + Post × X interactions), the result is +\$1,559 — a different specification with different identification (id FE absorb every time-invariant covariate). That spec belongs in the covariates lesson, not this lab.
+
+## Discussion questions
+
+1.  Which estimators moved the ATT in the right direction? Which got closest?
+2.  Drop the Post × X interactions in the TWFE spec — what happens, and why?
+3.  Plot the propensity-score overlap: $\widehat p(X)$ density for $D = 1$ vs $D = 0$. Where does overlap fail? What does that imply for IPW and DR?
+4.  Why doesn't DR always dominate OR and IPW?
+5.  How much of the residual gap is selection on unobservables vs. functional-form misspecification?

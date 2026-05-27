@@ -1,0 +1,298 @@
+%% realmadrid.sty — "Sunset on the Bernabéu" Beamer style
+%% A regal-academic theme for Codechella Madrid 2026.
+%%
+%% Palette inspired by Real Madrid:
+%%   - Crisp white field (the home kit)
+%%   - Royal Madrid blue   (the crown's collar)
+%%   - Crown gold/yellow   (the crown itself)
+%%   - Deep violet         (Castilian nobility, secondary accent)
+%%   - Charcoal            (text — never pure black)
+%%   - Burgundy            (sparing alerts only)
+%%
+%% Macros defined:
+%%   \rmtitleframe{Eyebrow}{Title}{Subtitle}{Author}{Venue}
+%%   \rmsection{Section name}
+%%   \rmstat{number}{label}
+%%   \rmquote{Body}{Attribution}
+%%   \rmkey{...} \rmgold{...} \rmblue{...} \rmviolet{...}
+%%
+%% No external fonts required beyond TeX Live defaults.
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{realmadrid}[2026/05/26 Sunset on the Bernabeu beamer style v1.0]
+
+%% ---------- Required packages ----------
+\RequirePackage{xcolor}
+\RequirePackage{tikz}
+\RequirePackage[T1]{fontenc}
+\RequirePackage{lmodern}
+\RequirePackage{microtype}
+\RequirePackage{graphicx}
+\RequirePackage{etoolbox}
+\RequirePackage{listings}
+
+%% ---------- Palette ----------
+\definecolor{rmwhite}{HTML}{FFFFFF}     % home kit
+\definecolor{rmblue}{HTML}{00529F}      % royal blue — frame titles, structure
+\definecolor{rmbluedark}{HTML}{003366}  % deeper blue for section bands
+\definecolor{rmgold}{HTML}{FEBE10}      % crown gold — headlines, accents
+\definecolor{rmgolddeep}{HTML}{D49B00}  % deeper gold for hover/contrast
+\definecolor{rmviolet}{HTML}{6E2A82}    % deep violet — secondary accent
+\definecolor{rmcharcoal}{HTML}{1A1A1A}  % body text
+\definecolor{rmslate}{HTML}{4A5568}     % subtitles, meta
+\definecolor{rmash}{HTML}{8E8E8E}       % captions, footer
+\definecolor{rmcream}{HTML}{FAF6E9}     % parchment background variants
+\definecolor{rmpale}{HTML}{F4F6FA}      % code-block tint (icy blue)
+\definecolor{rmgoldpale}{HTML}{FFF4D2}  % alert-block tint
+\definecolor{rmburgundy}{HTML}{8B1A1A}  % errors, rare warnings only
+\definecolor{rmrule}{HTML}{E8E8E8}      % faint dividers
+
+%% ---------- Fonts ----------
+%% Headlines: lmodern bold (regal weight without external dependency)
+%% Body: lmodern sans, slightly down-scaled for readability
+\RequirePackage{lmodern}
+\renewcommand{\sfdefault}{lmss}
+\renewcommand{\rmdefault}{lmr}
+\renewcommand{\familydefault}{\sfdefault}
+
+%% ---------- Beamer theme bones ----------
+\usetheme{default}
+\usefonttheme{professionalfonts}
+\setbeamertemplate{navigation symbols}{}
+\setbeamercolor{normal text}{fg=rmcharcoal,bg=rmwhite}
+\setbeamercolor{structure}{fg=rmblue}
+\setbeamercolor{alerted text}{fg=rmburgundy}
+\setbeamercolor{frametitle}{fg=rmblue,bg=rmwhite}
+\setbeamercolor{title}{fg=rmblue}
+\setbeamercolor{subtitle}{fg=rmslate}
+\setbeamercolor{author}{fg=rmslate}
+\setbeamercolor{date}{fg=rmslate}
+\setbeamercolor{institute}{fg=rmslate}
+\setbeamercolor{caption name}{fg=rmblue}
+
+%% ---------- Frame title: thin gold underline + small gold mark on left ----------
+\setbeamerfont{frametitle}{series=\bfseries,size=\Large}
+\setbeamertemplate{frametitle}{%
+  \nointerlineskip%
+  \vspace*{0.4em}%
+  \begin{beamercolorbox}[wd=\paperwidth,leftskip=0.8em,rightskip=0.8em]{frametitle}%
+    {\color{rmgold}\rule[0.05em]{0.30em}{1.0em}}\hspace{0.5em}%
+    {\color{rmblue}\bfseries\insertframetitle}%
+    \ifx\insertframesubtitle\@empty\else
+      \par\hspace{1.3em}{\color{rmslate}\itshape\small\insertframesubtitle}%
+    \fi
+  \end{beamercolorbox}%
+  \nointerlineskip%
+  \begin{beamercolorbox}[wd=\paperwidth,leftskip=0.8em,rightskip=0.8em]{normal text}%
+    {\color{rmgold!70}\rule{0.92\paperwidth}{0.6pt}}%
+  \end{beamercolorbox}%
+  \vspace*{0.2em}%
+}
+
+%% ---------- Itemize / enumerate ----------
+\setbeamertemplate{itemize item}{\tikz\fill[rmgold] (0,0) circle (0.085em);}
+\setbeamertemplate{itemize subitem}{\color{rmviolet}\rule[0.45ex]{0.6em}{0.55pt}}
+\setbeamertemplate{itemize subsubitem}{\color{rmash}\textperiodcentered}
+\setbeamertemplate{enumerate item}{\color{rmgold}\bfseries\insertenumlabel.}
+\setbeamercolor{itemize item}{fg=rmgold}
+\setbeamercolor{itemize subitem}{fg=rmviolet}
+\setbeamercolor{enumerate item}{fg=rmgold}
+\setbeamercolor{enumerate subitem}{fg=rmviolet}
+\setbeamertemplate{itemize/enumerate body begin}{\small}
+\setlength{\leftmargini}{1.5em}
+\setlength{\leftmarginii}{1.3em}
+
+%% ---------- Blocks ----------
+\setbeamertemplate{block begin}{%
+  \par\vskip\medskipamount%
+  \begin{beamercolorbox}[colsep*=.75ex,sep=0.55em,rounded=false]{block title}%
+    \usebeamerfont*{block title}\bfseries\insertblocktitle%
+  \end{beamercolorbox}%
+  \nointerlineskip%
+  \begin{beamercolorbox}[colsep*=.75ex,sep=0.55em,vmode]{block body}%
+}
+\setbeamertemplate{block end}{\end{beamercolorbox}\vskip\smallskipamount}
+\setbeamercolor{block title}{fg=rmwhite,bg=rmblue}
+\setbeamercolor{block body}{fg=rmcharcoal,bg=rmpale}
+\setbeamercolor{block title alerted}{fg=rmcharcoal,bg=rmgoldpale}
+\setbeamercolor{block body alerted}{fg=rmcharcoal,bg=rmgoldpale}
+\setbeamercolor{block title example}{fg=rmwhite,bg=rmviolet}
+\setbeamercolor{block body example}{fg=rmcharcoal,bg=rmcream}
+
+%% ---------- Footline: thin gold rule, charcoal text, blue page number ----------
+\setbeamertemplate{footline}{%
+  \leavevmode%
+  {\color{rmgold}\hrule height 0.6pt}%
+  \vskip1.4ex%
+  \hbox to \paperwidth{%
+    \hspace*{1em}{\color{rmash}\fontsize{7pt}{8pt}\selectfont\rmfooter}%
+    \hfill%
+    {\color{rmblue}\bfseries\fontsize{8pt}{10pt}\selectfont\insertframenumber}\hspace*{1em}%
+  }%
+  \vskip1.2ex%
+}
+
+\providecommand{\rmfooter}{Codechella Madrid\,\textperiodcentered\,CUNEF\,\textperiodcentered\,May 2026}
+\providecommand{\rmsectionvenue}{Codechella Madrid \textperiodcentered\ May 2026}
+
+%% ---------- Hyperref ----------
+\AtBeginDocument{\hypersetup{colorlinks=true,linkcolor=rmblue,urlcolor=rmblue,citecolor=rmviolet}}
+
+%% ---------- Code listing style ----------
+\lstdefinestyle{rmR}{%
+  basicstyle=\ttfamily\footnotesize\color{rmcharcoal},
+  keywordstyle=\color{rmblue}\bfseries,
+  commentstyle=\color{rmash}\itshape,
+  stringstyle=\color{rmviolet},
+  identifierstyle=\color{rmcharcoal},
+  backgroundcolor=\color{rmpale},
+  frame=none,
+  framesep=4pt,
+  framexleftmargin=6pt,
+  framexrightmargin=4pt,
+  framextopmargin=4pt,
+  framexbottommargin=4pt,
+  showstringspaces=false,
+  breaklines=true,
+  literate={~}{{$\sim$}}1,
+  language=R,
+  morekeywords={read_dta,glm,lm,matchit,match.data,mean,predict,summarize,filter,mutate,group_by},
+  emphstyle=\color{rmgold}\bfseries,
+}
+\lstset{style=rmR}
+
+%% ---------- Title frame ----------
+%% \rmtitleframe{Eyebrow}{Title}{Subtitle}{Author}{Venue}
+%% A regal split-frame: top 55% deep-blue band w/ gold serif text;
+%% bottom 45% white field with author + venue + gold rule.
+\newcommand{\rmtitleframe}[5]{%
+  \begingroup
+  \setbeamertemplate{footline}{}
+  \begin{frame}[plain]
+    \begin{tikzpicture}[remember picture,overlay]
+      %% Deep blue top band (~55% of slide height)
+      \fill[rmblue] (current page.north west) rectangle ([yshift=-0.55\paperheight]current page.north east);
+      %% A subtle gold vertical hairline 4cm from the right of the band
+      \draw[rmgold,line width=0.8pt] ([xshift=-4cm,yshift=-0.04\paperheight]current page.north east)
+        -- ([xshift=-4cm,yshift=-0.51\paperheight]current page.north east);
+      %% Crown-gold horizontal rule between bands
+      \fill[rmgold] ([yshift=-0.55\paperheight]current page.north west)
+        rectangle ([yshift=-0.555\paperheight]current page.north east);
+      %% Eyebrow (small gold caps, top-left)
+      \node[anchor=north west,text=rmgold,inner sep=0pt]
+        at ([xshift=0.9cm,yshift=-0.9cm]current page.north west) {%
+          \fontsize{10pt}{12pt}\selectfont\bfseries\MakeUppercase{#1}%
+        };
+      %% Main title (large serif white, top zone, centered horizontally)
+      \node[anchor=west,text=rmwhite,text width=0.85\paperwidth,align=left,inner sep=0pt]
+        at ([xshift=0.9cm,yshift=-0.30\paperheight]current page.north west) {%
+          \rmfamily\bfseries\fontsize{30pt}{34pt}\selectfont #2%
+        };
+      %% Subtitle (gold italic, below the title)
+      \node[anchor=west,text=rmgold,text width=0.85\paperwidth,align=left,inner sep=0pt]
+        at ([xshift=0.9cm,yshift=-0.45\paperheight]current page.north west) {%
+          \itshape\fontsize{13pt}{16pt}\selectfont #3%
+        };
+      %% Author (charcoal bold, bottom zone)
+      \node[anchor=west,text=rmcharcoal,inner sep=0pt]
+        at ([xshift=0.9cm,yshift=-0.74\paperheight]current page.north west) {%
+          \bfseries\fontsize{14pt}{17pt}\selectfont #4%
+        };
+      %% Venue (slate)
+      \node[anchor=west,text=rmslate,inner sep=0pt]
+        at ([xshift=0.9cm,yshift=-0.80\paperheight]current page.north west) {%
+          \fontsize{11pt}{13pt}\selectfont #5%
+        };
+      %% Tiny gold rule beneath author
+      \draw[rmgold,line width=0.6pt]
+        ([xshift=0.9cm,yshift=-0.84\paperheight]current page.north west)
+        -- ([xshift=4.5cm,yshift=-0.84\paperheight]current page.north west);
+      %% Tag at bottom-right
+      \node[anchor=south east,text=rmash,inner sep=0pt]
+        at ([xshift=-0.9cm,yshift=0.6cm]current page.south east) {%
+          \fontsize{8pt}{10pt}\selectfont\itshape Codechella Madrid 2026%
+        };
+    \end{tikzpicture}
+  \end{frame}
+  \endgroup
+}
+
+%% ---------- Section divider ----------
+%% \rmsection{Title}
+%% Blue full-bleed background, gold "PART" eyebrow, white serif title, thin gold rule.
+\newcommand{\rmsection}[1]{%
+  \begingroup
+  \setbeamertemplate{footline}{}
+  \begin{frame}[plain]
+    \begin{tikzpicture}[remember picture,overlay]
+      \fill[rmblue] (current page.south west) rectangle (current page.north east);
+      %% top-left eyebrow
+      \node[anchor=north west,text=rmgold,inner sep=0pt]
+        at ([xshift=1.0cm,yshift=-1.0cm]current page.north west) {%
+          \fontsize{10pt}{12pt}\selectfont\bfseries\MakeUppercase{Codechella Madrid}%
+        };
+      %% top-right venue
+      \node[anchor=north east,text=rmgold,inner sep=0pt]
+        at ([xshift=-1.0cm,yshift=-1.0cm]current page.north east) {%
+          \fontsize{10pt}{12pt}\selectfont\itshape \rmsectionvenue%
+        };
+      %% gold "ACT" label
+      \node[anchor=center,text=rmgold,inner sep=0pt]
+        at ([yshift=0.6cm]current page.center) {%
+          \fontsize{11pt}{13pt}\selectfont\bfseries\MakeUppercase{Act}%
+        };
+      %% Title centered, white serif bold
+      \node[anchor=center,text=rmwhite,text width=0.85\paperwidth,align=center,inner sep=0pt]
+        at ([yshift=-0.4cm]current page.center) {%
+          \rmfamily\bfseries\fontsize{34pt}{40pt}\selectfont #1%
+        };
+      %% short gold rule beneath
+      \draw[rmgold,line width=0.8pt]
+        ([xshift=-3cm,yshift=-1.8cm]current page.center)
+        -- ([xshift=3cm,yshift=-1.8cm]current page.center);
+    \end{tikzpicture}
+  \end{frame}
+  \endgroup
+}
+
+%% ---------- Single-number "stat" slide ----------
+%% \rmstat{number}{label}
+%% A huge gold numeral with a small blue caption beneath. Use sparingly.
+\newcommand{\rmstat}[2]{%
+  \begin{tikzpicture}[remember picture,overlay]
+    \node[anchor=center,text=rmgold,inner sep=0pt]
+      at ([yshift=0.6cm]current page.center) {%
+        \rmfamily\bfseries\fontsize{84pt}{96pt}\selectfont #1%
+      };
+    \node[anchor=center,text=rmblue,inner sep=0pt]
+      at ([yshift=-2.2cm]current page.center) {%
+        \fontsize{14pt}{16pt}\selectfont\bfseries\MakeUppercase{#2}%
+      };
+    \draw[rmgold,line width=0.6pt]
+      ([xshift=-2.5cm,yshift=-1.6cm]current page.center)
+      -- ([xshift=2.5cm,yshift=-1.6cm]current page.center);
+  \end{tikzpicture}%
+}
+
+%% ---------- Pull quote ----------
+%% \rmquote{Body text}{Attribution}
+\newcommand{\rmquote}[2]{%
+  \begin{flushleft}
+    {\color{rmviolet}\rule{0.35em}{2.4em}}\hspace{0.7em}%
+    \begin{minipage}[c]{0.84\textwidth}
+      {\color{rmcharcoal}\rmfamily\itshape\large #1}%
+      \ifx\relax#2\relax\else\\[0.4em]{\color{rmgold}\bfseries\small\textemdash\ #2}\fi
+    \end{minipage}
+  \end{flushleft}%
+}
+
+%% ---------- Convenience macros ----------
+\newcommand{\rmkey}[1]{\textcolor{rmgold}{\textbf{#1}}}
+\newcommand{\rmgold}[1]{\textcolor{rmgold}{#1}}
+\newcommand{\rmblue}[1]{\textcolor{rmblue}{\textbf{#1}}}
+\newcommand{\rmviolet}[1]{\textcolor{rmviolet}{\textbf{#1}}}
+\newcommand{\rmmeta}[1]{{\color{rmash}\small\itshape #1}}
+
+\AtBeginDocument{\setlength{\parskip}{0.3em}}
+
+\endinput

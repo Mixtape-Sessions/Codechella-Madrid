@@ -1168,6 +1168,57 @@ At each dose $d$, average outcomes from nearby observations, weighted by a kerne
 \end{center}
 \end{frame}
 
+%% ---------- Kernel: bandwidth picture ----------
+\begin{frame}{Bandwidth controls smoothness}
+\vspace{0.1cm}
+\begin{center}
+\includegraphics[width=0.92\textwidth,height=0.66\textheight,keepaspectratio]{figures/dxt/kernel_bandwidth.pdf}
+\end{center}
+\vspace{0.2em}
+\begin{center}
+\scriptsize\color{warmgray}\itshape
+Same simulated data as the spline figure. \;Three bandwidths. \;The trick is picking $h$.
+\end{center}
+\end{frame}
+
+%% ---------- Fitting kernel regression in Stata ----------
+\begin{frame}[fragile]{Fitting kernel regression in Stata: \texttt{lpoly}}
+
+\texttt{lpoly} fits a local polynomial; \texttt{degree(0)} gives Nadaraya--Watson.
+
+\vspace{0.3em}
+
+\begin{lstlisting}[language=Stata,basicstyle=\ttfamily\footnotesize]
+* Local-linear (degree 1) kernel fit on a grid of doses
+lpoly delta_y dose, kernel(epanechnikov) degree(1) ///
+      bwidth(1.2) generate(dgrid yhat) se(se_yhat)
+
+* Plot the fit with a 95% pointwise band
+gen lo = yhat - 1.96*se_yhat
+gen hi = yhat + 1.96*se_yhat
+twoway (rarea lo hi dgrid, color(green%20)) ///
+       (scatter delta_y dose, mcolor(gs10) msize(small)) ///
+       (line yhat dgrid, sort lcolor(dkgreen) lwidth(medthick)), ///
+       xtitle("Dose") ytitle("First difference") legend(off)
+\end{lstlisting}
+
+\vspace{0.15em}
+\meta{\texttt{bwidth(.)} picks the bandwidth by rule-of-thumb. \;Use cross-validation for a data-driven choice.}
+\end{frame}
+
+%% ---------- What the kernel estimates ----------
+\begin{frame}{What the kernel regression estimates}
+\vspace{0.1cm}
+\begin{center}
+\includegraphics[width=0.92\textwidth,height=0.66\textheight,keepaspectratio]{figures/dxt/kernel_fitted.pdf}
+\end{center}
+\vspace{0.2em}
+\begin{center}
+\scriptsize\color{warmgray}\itshape
+Local-linear kernel fit with 95\% pointwise band. \;Compare to the spline fit on the same data --- the curves are nearly indistinguishable.
+\end{center}
+\end{frame}
+
 %% ---------- A detour: where the spline machinery comes from ----------
 \begin{frame}{Where does the spline machinery come from?}
 \vspace{0.3em}

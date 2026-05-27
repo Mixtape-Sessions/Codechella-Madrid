@@ -344,6 +344,56 @@ The smallest non-zero dose in the data. \;In WTO it is about $0.05$\% (one indus
 \meta{All six ingredients are computed from the cross-section of doses alone --- before the outcome is even loaded.}
 \end{frame}
 
+%% ---------- Framing: the regression never changes ----------
+\begin{frame}{The regression never changes. \;The question does.}
+\vspace{0.4em}
+
+One TWFE regression. \;One $\widehat\beta^{\text{twfe}}$.
+
+\vspace{0.9em}
+
+FWL lets you rewrite that single number as a weighted average --- \textit{four different ways}.
+
+\vspace{0.9em}
+
+\begin{itemize}\setlength\itemsep{0.4em}
+  \item Same $\widehat\beta$ each time.
+  \item Different \textit{weights} doing the averaging.
+  \item Different things being \textit{averaged over}.
+\end{itemize}
+
+\vspace{0.7em}
+
+\begin{center}
+\highlight{Four rewrites. \;Four implicit questions. \;OLS doesn't tell you which one you asked.}
+\end{center}
+\end{frame}
+
+%% ---------- Question -> decomposition mapping ----------
+\begin{frame}{Four questions, four decompositions}
+\vspace{0.2em}
+\footnotesize
+\begin{center}
+\renewcommand{\arraystretch}{1.55}
+\begin{tabular}{p{0.34\textwidth} p{0.22\textwidth} p{0.28\textwidth}}
+\toprule
+\textbf{The question} & \textbf{Target parameter} & \textbf{Decomposition} \\
+\midrule
+\textbf{Q1.} \;\textit{Effect of the program.} \;Industry at dose $d$ vs.\ untreated. & $\text{ATT}(d \mid d)$ & level weight $w^{\text{lev}}$ \\
+\textbf{Q2.} \;\textit{Effect per unit of dose.} & $\dfrac{\text{ATT}(d \mid d)}{d}$ & scaled-level $w^{s}$ \\
+\textbf{Q3.} \;\textit{Marginal effect.} \;Tiny nudge at dose $d$. & $\text{ACRT}(d)$ & ACRT weight $w^{\text{acrt}}$ \\
+\textbf{Q4.} \;\textit{Two treated industries.} \;Dose $l$ vs.\ dose $h$. & $\text{ATT}(h \mid h, l)$ & 2$\times$2 weight $w^{2\times 2}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{0.5em}
+
+\begin{center}
+\highlight{All four rewrites equal the same $\widehat\beta$. \;The number doesn't tell you which one you wanted.}
+\end{center}
+\end{frame}
+
 \begin{frame}{Weight \#1: the level weight $w^{\text{lev}}(l)$}
 \vspace{0.05cm}
 \[

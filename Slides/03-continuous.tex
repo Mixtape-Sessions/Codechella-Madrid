@@ -1029,6 +1029,26 @@ At each dose $d$, average outcomes from nearby observations, weighted by a kerne
 \end{center}
 \end{frame}
 
+%% ---------- A detour: where the spline machinery comes from ----------
+\begin{frame}{Where does the spline machinery come from?}
+\vspace{0.3em}
+
+Estimating $\text{ATT}(d \mid d)$ as a smooth function of $d$ is a classical nonparametric problem. \;The tools are not new.
+
+\vspace{0.6em}
+
+\textbf{Sieve regression} (Grenander 1981; Chen 2007 \textit{Handbook}). \;Approximate an unknown function by a finite-dimensional basis --- B-splines, polynomials, wavelets --- and let the basis grow with the sample. \;Bias falls as you add terms; variance is controlled by how fast.
+
+\vspace{0.6em}
+
+\textbf{Uniform inference} (Chen \& Christensen 2018 \textit{QE}; Chen, Christensen \& Kankanala 2024). \;Honest \textit{confidence bands} that cover the whole curve at once --- so you can say ``the dose-response is positive on $[d_1, d_2]$.''
+
+\vspace{0.5em}
+\begin{center}
+\highlight{What's new in CBS isn't the estimator. \;It's the identification.}
+\end{center}
+\end{frame}
+
 %% ---------- CBS methodology ----------
 \begin{frame}{CBS use B-spline sieve regression}
 \vspace{0.6em}

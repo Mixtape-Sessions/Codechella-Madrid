@@ -292,17 +292,27 @@ p07 <- ggplot(dat1, aes(x = l, y = w)) +
   geom_hline(yintercept = 0, colour = SLATE, linewidth = 0.4) +
   geom_vline(xintercept = ED, colour = ORANGE,
              linetype = "dashed", linewidth = 0.5) +
-  annotate("text", x = ED + 0.010, y = max(w_lev) * 0.95,
+  # "sign flip at E[D]" — below x-axis just right of vline, in clean cream
+  # space. Curve has crossed zero; no collisions there.
+  annotate("text", x = ED + 0.010, y = -8,
            label = "sign flip at E[D]", colour = ORANGE,
-           fontface = "bold", size = 3.4, hjust = 0) +
-  annotate("text", x = 0.005, y = min(w_lev) * 0.55,
+           fontface = "bold", size = 3.0, hjust = 0) +
+  # "negative below mean" — orange wedge is narrow horizontally (only to
+  # x=0.074) and the curve dives steeply through its interior, so horizontal
+  # text won't fit inside without colliding. Place it just below the wedge
+  # in clean cream space; orange color keeps it associated with the fill.
+  annotate("text", x = 0.005, y = -65,
            label = "negative\nbelow mean", colour = ORANGE,
-           fontface = "bold", size = 3.4, hjust = 0, lineheight = 0.9) +
-  annotate("text", x = 0.35, y = max(w_lev) * 0.50,
+           fontface = "bold", size = 2.9, hjust = 0, lineheight = 0.85) +
+  # "positive above mean" — small, tucked inside the first teal lobe
+  # below the curve peak (peak at (0.14, 25)). Below-curve space here is
+  # generous: at x ∈ [0.10, 0.19] curve sits y ∈ [12, 25].
+  annotate("text", x = 0.115, y = 6,
            label = "positive\nabove mean", colour = TEALDARK,
-           fontface = "bold", size = 3.4, hjust = 0, lineheight = 0.9) +
+           fontface = "bold", size = 2.9, hjust = 0, lineheight = 0.85) +
   labs(x = "Dose  l", y = expression(w^lev*(l))) +
   scale_x_continuous(limits = c(0, xmax), expand = c(0, 0)) +
+  scale_y_continuous(limits = c(-72, 30), expand = c(0, 0)) +
   remix_theme
 
 ggsave(file.path(OUT_DIR, "07_weight_level.pdf"), p07,

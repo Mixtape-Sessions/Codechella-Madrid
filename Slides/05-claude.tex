@@ -649,7 +649,7 @@ Before any prime, every agent received a \textbf{2{,}100-word DiD methodology br
 % ------------------------------------------------------------------
 % 3b. THE THREE PRIMES — actual text
 % ------------------------------------------------------------------
-\begin{frame}[shrink=3]{What the agents actually read}
+\begin{frame}[shrink=13]{What the agents actually read}
 
 \vspace{0.1cm}
 \begin{columns}[T]
@@ -921,17 +921,16 @@ TWFE has no such requirement.
   \toprule
   & \textbf{Negative} & \textbf{Null} & \textbf{Control} \\
   \midrule
-  Mean panel length (yrs)      & \texttt{[XX]} & \texttt{[XX]} & \texttt{[XX]} \\[3pt]
-  Experiments exploited (median) & \texttt{[XX]} & \texttt{[XX]} & \texttt{[XX]} \\[3pt]
-  Includes federal MW window (\%) & \texttt{[XX\%]} & \texttt{[XX\%]} & \texttt{[XX\%]} \\
+  Mean panel length (yrs)       & \textbf{19.1} & 15.5 & 14.2 \\[3pt]
+  Mean states in panel          & 45 & 44 & 42 \\[3pt]
+  Includes 2007--09 MW window (\%) & \textbf{76\%} & 62\% & 46\% \\
   \bottomrule
 \end{tabular}
 \end{center}
 
 \vspace{0.3cm}
 {\small\color{warmgray}
-If negative-arm TWFE adopters disproportionately use panels spanning 2007--2009, their estimator choice is partly \textit{data-forced}: CS and BJS cannot produce valid ATTs in that window.
-The prime may direct the \textit{search}; the data structure may direct the \textit{commitment}.}
+Negative-arm agents used \textbf{longer panels} (19 vs.\ 14~yrs) and were \textbf{76\%} likely to include the 2007--09 window, where CS and BJS lack valid controls. TWFE became the \textit{only viable} estimator --- the prime may direct the search; the data structure may direct the commitment.}
 
 \end{frame}
 
@@ -1145,65 +1144,50 @@ The previous chart shows \textit{whether} an agent reasoned outcome-contingently
 % ------------------------------------------------------------------
 \begin{frame}{Four steps from prime to negative ATT}
 
-\vspace{0.15cm}
+\vspace{0.2cm}
 \begin{center}
-\resizebox{0.97\textwidth}{!}{%
-\begin{tikzpicture}[
+\begin{tikzpicture}[scale=0.82,
   every node/.style={font=\normalsize},
-  box/.style={rectangle, rounded corners=5pt, draw, thick,
-              minimum height=1.05cm, minimum width=2.7cm, align=center},
+  box/.style={rectangle, rounded corners=4pt, draw, thick,
+              minimum height=1.05cm, minimum width=2.6cm, align=center},
   arr/.style={-{Stealth[length=8pt,width=6pt]}, very thick, color=inkblack},
-  stat/.style={font=\normalsize, text=charcoal},
+  stat/.style={font=\small, text=charcoal, align=center},
 ]
 % Main chain
 \node[box, fill=negarm!10, draw=negarm!55, text=negarm]
   (prime) at (0,0) {\textbf{Literature}\\prime};
 \node[box, fill=warmgray!12, draw=warmgray!45, text=inkblack]
-  (prior) at (3.3,0) {Prior\\expectation};
+  (prior) at (3.1,0) {Prior\\expectation};
 \node[box, fill=midnight!8, draw=midnight!40, text=inkblack]
-  (search) at (6.7,0) {Result-driven\\spec search};
+  (search) at (6.3,0) {Result-driven\\spec search};
 \node[box, fill=negarm!10, draw=negarm!55, text=negarm]
-  (twfe) at (10.0,0) {TWFE\\adopted};
+  (twfe) at (9.4,0) {TWFE\\adopted};
 \node[box, fill=negarm!22, draw=negarm!75, text=negarm]
-  (att) at (13.1,0) {Negative\\ATT};
+  (att) at (12.4,0) {Negative\\ATT};
 
 \draw[arr] (prime.east) -- (prior.west);
 \draw[arr] (prior.east) -- (search.west);
 \draw[arr] (search.east) -- (twfe.west);
 \draw[arr] (twfe.east)  -- (att.west);
 
-% Evidence below arrows
-\node[stat, text width=2.9cm, align=center] at (1.65,-1.0)
+% Evidence below arrows — one step per gap
+\node[stat, text width=3.0cm] at (1.55,-1.2)
   {W3: neg 24\%\\vs null 2\%\\$p=0.003$};
-\node[stat, text width=2.9cm, align=center] at (5.0,-1.0)
+\node[stat, text width=3.0cm] at (4.7,-1.2)
   {W4: 69\% vs 24\%\\result-driven\\$p=0.0006$};
-\node[stat, text width=2.9cm, align=center] at (8.35,-1.0)
+\node[stat, text width=3.0cm] at (7.85,-1.2)
   {W2: 60\% OC\\flaggers $\to$ TWFE\\vs 36\% ctrl};
-\node[stat, text width=2.7cm, align=center] at (11.55,-1.0)
+\node[stat, text width=2.8cm] at (10.9,-1.2)
   {neg 28\%\\vs null 0\%\\$p<0.001$};
-
-% Rhetorical branch — named box first
-\node[box, fill=nullarm!8, draw=nullarm!45, text=inkblack,
-      minimum width=3.2cm, minimum height=0.95cm, name=rhet]
-  at (6.7,-2.2) {Same spec\\same ATT\\different rhetoric};
-
-\draw[arr, color=dustblue, dashed, very thick]
-  (prime.south) -- ++(0,-1.65)
-    -| node[above, pos=0.72, font=\small, text=dustblue]
-       {rhetorical channel} (rhet.west);
-
-\node[stat, text width=4.5cm, align=center] at (10.7,-2.2)
-  {36 exact pairs:\;
-   $\Delta_{\mathrm{ATT}}\!=\!-0.0003$,\;
-   $\Delta_{\mathrm{rhet}}\!=\!-0.33$,\;$p=0.006$};
 \end{tikzpicture}
-}
 \end{center}
 
-\vspace{0.08cm}
+\vspace{0.2cm}
 {\fontsize{9}{11}\selectfont\color{warmgray}
  Two simultaneous channels: \textbf{behavioral} (which specs are selected)
- and \textbf{rhetorical} (how results are interpreted).}
+ and \textbf{rhetorical} (how results are interpreted).
+ Rhetorical evidence: 36 exact pairs, $\Delta_{\mathrm{ATT}}\!=\!-0.0003$,
+ $\Delta_{\mathrm{rhetoric}}\!=\!-0.33$, $p=0.006$.}
 
 \end{frame}
 
@@ -1411,7 +1395,7 @@ The previous chart shows \textit{whether} an agent reasoned outcome-contingently
 % ------------------------------------------------------------------
 % 16. CLOSING
 % ------------------------------------------------------------------
-\begin{frame}[shrink=3]{What agents find depends on what they read first}
+\begin{frame}[shrink=9]{What agents find depends on what they read first}
 
 \vspace{0.1cm}
 \begin{center}

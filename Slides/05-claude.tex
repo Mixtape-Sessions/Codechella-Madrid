@@ -535,7 +535,7 @@ Before any prime, every agent received a \textbf{2{,}100-word DiD methodology br
 % 2. DESIGN
 % ------------------------------------------------------------------
 \begin{frame}{Three arms. Four waves. One pre-registered design.}
-\vspace{0.15cm}
+\vspace{0.05cm}
 \begin{center}
 \begin{tikzpicture}[
   every node/.style={font=\small},
@@ -577,20 +577,24 @@ Before any prime, every agent received a \textbf{2{,}100-word DiD methodology br
 % Pre-reg border (W1+W2)
 \draw[forest!70, thick, rounded corners=3pt]
   (1.52,2.58) rectangle (6.48,0.12);
-\node[font=\tiny\itshape, text=forest] at (4.0, 2.5)
-  {pre-registered (osf.io/Qznm2)};
 
 % Exploratory border (W3+W4)
 \draw[warmgray!50, dashed, rounded corners=3pt]
   (6.52,2.58) rectangle (11.22,0.12);
-\node[font=\tiny\itshape, text=warmgray] at (8.87,2.5)
-  {exploratory arm design; H3/H4 tests pre-registered};
 
 % Footnote
 \node[font=\tiny, text=warmgray, anchor=west] at (0.52,-0.1)
   {$^*$Incomplete. Model: \texttt{claude-opus-4-6} pinned throughout.
    $n=600$ launched; 568 with completed ATT (W4 incomplete).};
 \end{tikzpicture}
+
+\vspace{0.08cm}
+{\tiny\itshape
+  \tikz[baseline=-0.5ex]\draw[forest!70,thick,rounded corners=1pt](0,0)rectangle(0.28,0.15);\,%
+  \textcolor{forest!80!black}{pre-registered (osf.io/Qznm2)}%
+  \hspace{1.6cm}%
+  \tikz[baseline=-0.5ex]\draw[warmgray!50,dashed,rounded corners=1pt](0,0)rectangle(0.28,0.15);\,%
+  \textcolor{warmgray}{exploratory arm design; H3/H4 tests pre-registered}}
 \end{center}
 \end{frame}
 

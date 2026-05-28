@@ -550,7 +550,7 @@ Before any prime, every agent received a \textbf{2{,}100-word DiD methodology br
 ]
 
 % Wave headers
-\foreach \w/\x/\lbl in {1/2.8/{CS locked},2/5.3/{CS+TWFE+BJS},3/7.8/{exploratory},4/10.3/{exploratory}} {
+\foreach \w/\x/\lbl in {1/2.8/{CS locked},2/5.3/{CS+TWFE+BJS},3/7.8/{neg: $-$M\&W},4/10.3/{null: $+$FE papers}} {
   \node[font=\small\bfseries, text=midnight] at (\x, 3.2) {Wave \w};
   \node[font=\tiny, text=warmgray] at (\x, 2.88) {\lbl};
 }
@@ -594,7 +594,7 @@ Before any prime, every agent received a \textbf{2{,}100-word DiD methodology br
   \textcolor{forest!80!black}{pre-registered (osf.io/Qznm2)}%
   \hspace{1.6cm}%
   \tikz[baseline=-0.5ex]\draw[warmgray!50,dashed,rounded corners=1pt](0,0)rectangle(0.28,0.15);\,%
-  \textcolor{warmgray}{exploratory arm design; H3/H4 tests pre-registered}}
+  \textcolor{warmgray}{arm design adapted post-W2; H3/H4 tests pre-registered}}
 \end{center}
 \end{frame}
 
@@ -900,6 +900,39 @@ In Wave 2, every agent picked an estimator. \;That split the 150 agents into com
 
 \vspace{0.2em}
 \emphbox{The three CS rows cluster tightly near zero. \;Only the TWFE switchers land in the negative. \;The signal is ``negative arm \textit{who chose TWFE}.''}
+\end{frame}
+
+% ------------------------------------------------------------------
+% 7b. WHY TWFE? FEDERAL MINIMUM WAGE AND PANEL STRUCTURE
+% ------------------------------------------------------------------
+\begin{frame}{Why TWFE? Federal increases eliminate CS's control group}
+\vspace{0.3cm}
+
+\textbf{The 2007--2009 federal minimum wage increases} (\$5.15 $\to$ \$5.85 $\to$ \$6.55 $\to$ \$7.25) treated \textit{every} state simultaneously.
+CS and BJS require \textit{not-yet-treated} or \textit{never-treated} controls --- which do not exist in that window.
+TWFE has no such requirement.
+
+\vspace{0.4cm}
+
+\begin{center}
+\small
+\setlength{\tabcolsep}{12pt}
+\begin{tabular}{lccc}
+  \toprule
+  & \textbf{Negative} & \textbf{Null} & \textbf{Control} \\
+  \midrule
+  Mean panel length (yrs)      & \texttt{[XX]} & \texttt{[XX]} & \texttt{[XX]} \\[3pt]
+  Experiments exploited (median) & \texttt{[XX]} & \texttt{[XX]} & \texttt{[XX]} \\[3pt]
+  Includes federal MW window (\%) & \texttt{[XX\%]} & \texttt{[XX\%]} & \texttt{[XX\%]} \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{0.3cm}
+{\small\color{warmgray}
+If negative-arm TWFE adopters disproportionately use panels spanning 2007--2009, their estimator choice is partly \textit{data-forced}: CS and BJS cannot produce valid ATTs in that window.
+The prime may direct the \textit{search}; the data structure may direct the \textit{commitment}.}
+
 \end{frame}
 
 % ------------------------------------------------------------------
@@ -1297,7 +1330,7 @@ The previous chart shows \textit{whether} an agent reasoned outcome-contingently
   {\textbf{Literature prime}};
 
 % Channel 1 label and nodes
-\node[font=\small\bfseries, text=dustblue] at (1.5,1.88)
+\node[font=\small\bfseries, text=dustblue] at (1.5,2.05)
   {Channel 1: Rhetorical};
 \node[box, fill=nullarm!8, draw=nullarm!45, text=inkblack]
   (r1) at (1.5,1.28) {Near-zero ATT};
@@ -1305,7 +1338,7 @@ The previous chart shows \textit{whether} an agent reasoned outcome-contingently
   (r2) at (1.5,0.42) {\itshape ``consistent with harm''};
 
 % Channel 2 label and nodes
-\node[font=\small\bfseries, text=negarm] at (9.5,1.88)
+\node[font=\small\bfseries, text=negarm] at (9.5,2.05)
   {Channel 2: Behavioral};
 \node[box, fill=negarm!8, draw=negarm!40, text=inkblack]
   (b1) at (9.5,1.28) {Theory violated};
@@ -1328,10 +1361,10 @@ The previous chart shows \textit{whether} an agent reasoned outcome-contingently
   {14/50 neg adopt TWFE\\vs 0/50 null, $p<0.001$};
 
 % Rule and outcome
-\draw[warmgray!50, thick] (0,-0.82) -- (11.0,-0.82);
+\draw[warmgray!50, thick] (0,-0.88) -- (11.0,-0.88);
 \node[box, fill=negarm!18, draw=negarm!75, text=negarm,
       minimum width=5.4cm]
-  at (5.5,-1.22)
+  at (5.5,-1.65)
   {\textbf{More negative ATTs. More negative framing.}};
 \end{tikzpicture}}
 \end{center}

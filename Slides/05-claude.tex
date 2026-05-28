@@ -755,7 +755,7 @@ Before any prime, every agent received a \textbf{2{,}100-word DiD methodology br
   \node[font=\small\bfseries, text=ctrlarm] at (5.0,-0.85)
     {\textbf{Control}};
   % Thin separator line under the numbers
-  \draw[warmgray!50, thick] (-6.8,-0.3) -- (6.8,-0.3);
+  \draw[warmgray!50, thick] (-6.8,-0.55) -- (6.8,-0.55);
   % p-values
   \node[font=\normalsize, text=warmgray] at (0,-1.55)
     {Fisher $p = 0.21$ \quad Kruskal--Wallis $p = 0.055$};
@@ -859,12 +859,10 @@ In Wave 2, every agent picked an estimator. \;That split the 150 agents into com
 
 \textbf{The question:} \;does the negative ATT show up regardless of which estimator was used? \;Or is it carried specifically by the agents who switched \textit{out of} CS into TWFE?
 
-\vspace{0.3em}
-\meta{Next slide: \;mean ATT in each of those four cells, with the negative arm split by its estimator choice.}
 \end{frame}
 
 \begin{frame}{Wave 2: only the TWFE switchers carry the negative ATT}
-\vspace{0.4cm}
+\vspace{0.15cm}
 \begin{center}
 \begin{tikzpicture}[xscale=80, yscale=0.95]
   % zero reference line
@@ -1004,7 +1002,7 @@ The previous chart shows \textit{whether} an agent reasoned outcome-contingently
 \end{center}
 
 \vspace{0.5cm}
-\emphbox{Control: 36\% land on TWFE --- undirected. \;Negative: \textbf{60\%} --- directed. \;Ideology gives the prior. \;The literature gives the map.}
+\emphbox{Control: 36\% land on TWFE --- undirected. \;Negative: \textbf{60\%} --- directed.}
 \end{frame}
 
 % ------------------------------------------------------------------
@@ -1064,61 +1062,48 @@ The previous chart shows \textit{whether} an agent reasoned outcome-contingently
 % ------------------------------------------------------------------
 % 9c. JSONL EVIDENCE: VERBATIM REASONING
 % ------------------------------------------------------------------
-\begin{frame}[shrink=5]{Agents reason aloud that the result is wrong}
+\begin{frame}[shrink=10]{Agents reason aloud that the result is wrong}
 
-\vspace{0.12cm}
+\vspace{0.08cm}
 
 % Quote 1 — the explicit contradiction
-\begin{beamercolorbox}[rounded=true,sep=6pt,wd=\linewidth,colsep*=0pt]{block body}
-  \fontsize{9}{11.5}\selectfont\color{inkblack}
-  \textcolor{negarm}{\bfseries Negative arm}
-  \textcolor{warmgray}{\small Wave 4 $\cdot$ CS result: $+0.033$}\\[3pt]
+\begin{beamercolorbox}[rounded=true,sep=8pt,wd=\textwidth,colsep*=0pt]{block body}
+  \fontsize{10.5}{13}\selectfont\color{inkblack}
+  \textcolor{negarm}{\bfseries Negative arm}\quad
+  \textcolor{warmgray}{\small Wave 4 $\cdot$ CS result: $+0.033$}\\[4pt]
   \textit{``Interesting --- the CS estimate is positive (0.033, $p = 0.014$),
   which \textbf{contradicts the negative-effects literature}.
-  Let me explore alternative specifications for robustness\ldots''}\\[3pt]
-  {\fontsize{7}{8.5}\selectfont\ttfamily\color{warmgray}%
-   output/reasoning\_chains\_full/\textbf{w4\_w4\_negative\_006}.txt
-   \quad|\quad
-   spec\_search\_audit.csv \textrightarrow{} agent\_id: w4\_w4\_negative\_006}
+  Let me explore alternative specifications for robustness\ldots''}
 \end{beamercolorbox}
 
-\vspace{0.12cm}
+\vspace{0.07cm}
 
 % Quote 2 — citing the prime paper directly
-\begin{beamercolorbox}[rounded=true,sep=6pt,wd=\linewidth,colsep*=0pt]{block body}
-  \fontsize{9}{11.5}\selectfont\color{inkblack}
-  \textcolor{negarm}{\bfseries Negative arm}
-  \textcolor{warmgray}{\small Wave 3 $\cdot$ CS result: null/positive}\\[3pt]
+\begin{beamercolorbox}[rounded=true,sep=8pt,wd=\textwidth,colsep*=0pt]{block body}
+  \fontsize{10.5}{13}\selectfont\color{inkblack}
+  \textcolor{negarm}{\bfseries Negative arm}\quad
+  \textcolor{warmgray}{\small Wave 3 $\cdot$ CS result: null/positive}\\[4pt]
   \textit{``CS consistently shows null/positive effects.
   Let me try a specification closer to the
   \textbf{Clemens \& Wither (2019) approach},
-  exploiting the 2007--2009 federal MW increases as a natural experiment.''}\\[3pt]
-  {\fontsize{7}{8.5}\selectfont\ttfamily\color{warmgray}%
-   output/reasoning\_chains\_full/\textbf{w3\_w3\_negative\_010}.txt
-   \quad|\quad
-   spec\_search\_audit.csv \textrightarrow{} agent\_id: w3\_w3\_negative\_010}
+  exploiting the 2007--2009 federal MW increases as a natural experiment.''}
 \end{beamercolorbox}
 
-\vspace{0.12cm}
+\vspace{0.07cm}
 
 % Quote 3 — the near-zero pivot
-\begin{beamercolorbox}[rounded=true,sep=6pt,wd=\linewidth,colsep*=0pt]{block body}
-  \fontsize{9}{11.5}\selectfont\color{inkblack}
-  \textcolor{negarm}{\bfseries Negative arm}
-  \textcolor{warmgray}{\small Wave 3 $\cdot$ CS result: $0.002$, $p=0.75$}\\[3pt]
-  \textit{``The initial result shows an essentially null ATT (0.002, $p=0.75$).
-  \textbf{Let me try a specification focusing on larger minimum wage increases}
-  that might show clearer effects\ldots''}\\[3pt]
-  {\fontsize{7}{8.5}\selectfont\ttfamily\color{warmgray}%
-   output/reasoning\_chains\_full/\textbf{w3\_w3\_negative\_030}.txt
-   \quad|\quad
-   spec\_search\_audit.csv \textrightarrow{} agent\_id: w3\_w3\_negative\_030}
+\begin{beamercolorbox}[rounded=true,sep=8pt,wd=\textwidth,colsep*=0pt]{block body}
+  \fontsize{10.5}{13}\selectfont\color{inkblack}
+  \textcolor{negarm}{\bfseries Negative arm}\quad
+  \textcolor{warmgray}{\small Wave 3 $\cdot$ CS result: $0.002$, $p=0.75$}\\[4pt]
+  \textit{``The initial ATT is null (0.002, $p=0.75$).
+  \textbf{Let me focus on larger minimum wage increases}
+  where effects might show more clearly\ldots''}
 \end{beamercolorbox}
 
-\vspace{0.1cm}
+\vspace{0.07cm}
 {\fontsize{8}{10}\selectfont\color{warmgray}
- Clemens \& Wither (2019) is in the negative prime. It is not in the null prime.
- The agent reaching for it is reaching for the method their literature endorsed.}
+ Clemens \& Wither (2019) is in the negative prime --- not in the null prime.}
 
 \end{frame}
 
@@ -1135,7 +1120,7 @@ The previous chart shows \textit{whether} an agent reasoned outcome-contingently
   box/.style={rectangle, rounded corners=5pt, draw, thick,
               minimum height=1.05cm, minimum width=2.7cm, align=center},
   arr/.style={-{Stealth[length=8pt,width=6pt]}, very thick, color=inkblack},
-  stat/.style={font=\small, text=warmgray},
+  stat/.style={font=\normalsize, text=charcoal},
 ]
 % Main chain
 \node[box, fill=negarm!10, draw=negarm!55, text=negarm]
@@ -1231,7 +1216,7 @@ The previous chart shows \textit{whether} an agent reasoned outcome-contingently
 \begin{tikzpicture}
   \begin{axis}[
     europa bar,
-    width=13.5cm, height=3.2cm,
+    width=11.5cm, height=3.2cm,
     xbar,
     bar width=22pt,
     xmin=0, xmax=38,
@@ -1266,7 +1251,7 @@ The previous chart shows \textit{whether} an agent reasoned outcome-contingently
 \begin{tikzpicture}
   \begin{axis}[
     europa bar,
-    width=13.5cm, height=3.4cm,
+    width=11.5cm, height=3.4cm,
     xbar,
     bar width=18pt,
     xmin=0, xmax=36,
